@@ -1,0 +1,3 @@
+[submodule "acl"]
+	path = acl
+	url = git@github.com:nfrechette/acl.git
