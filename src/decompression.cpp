@@ -8,23 +8,24 @@ namespace
 {
 	class PoseAOSTrackWriter : public track_writer
 	{
+		// Todo: Is it better to have 3 pointers rather than a constant offset?
 	private:
 		float* m_aosOutputBuffer;
 
 	public:
 		PoseAOSTrackWriter(float* aosOutputBuffer) : m_aosOutputBuffer(aosOutputBuffer) {}
 		
-		void RTM_SIMD_CALL write_rotation(uint32_t track_index, rtm::quatf_arg0 rotation)
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_rotation(uint32_t track_index, rtm::quatf_arg0 rotation)
 		{
 			rtm::quat_store(rotation, m_aosOutputBuffer + 12 * track_index);
 		}
 
-		void RTM_SIMD_CALL write_translation(uint32_t track_index, rtm::vector4f_arg0 translation)
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_translation(uint32_t track_index, rtm::vector4f_arg0 translation)
 		{
 			rtm::vector_store(translation, m_aosOutputBuffer + 12 * track_index + 4);
 		}
 
-		void RTM_SIMD_CALL write_scale(uint32_t track_index, rtm::vector4f_arg0 scale)
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_scale(uint32_t track_index, rtm::vector4f_arg0 scale)
 		{
 			rtm::vector_store(scale, m_aosOutputBuffer + 12 * track_index + 8);
 		}
@@ -59,7 +60,7 @@ namespace
 			, m_sz(boneCount * 9)
 		{}
 
-		void RTM_SIMD_CALL write_rotation(uint32_t track_index, rtm::quatf_arg0 rotation)
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_rotation(uint32_t track_index, rtm::quatf_arg0 rotation)
 		{
 			m_soaOutputBuffer[m_rx + track_index] = rtm::quat_get_x(rotation);
 			m_soaOutputBuffer[m_ry + track_index] = rtm::quat_get_y(rotation);
@@ -67,14 +68,14 @@ namespace
 			m_soaOutputBuffer[m_rw + track_index] = rtm::quat_get_w(rotation);
 		}
 
-		void RTM_SIMD_CALL write_translation(uint32_t track_index, rtm::vector4f_arg0 translation)
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_translation(uint32_t track_index, rtm::vector4f_arg0 translation)
 		{
 			m_soaOutputBuffer[m_tx] = rtm::vector_get_x(translation);
 			m_soaOutputBuffer[m_ty] = rtm::vector_get_y(translation);
 			m_soaOutputBuffer[m_tz] = rtm::vector_get_z(translation);
 		}
 
-		void RTM_SIMD_CALL write_scale(uint32_t track_index, rtm::vector4f_arg0 scale)
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_scale(uint32_t track_index, rtm::vector4f_arg0 scale)
 		{
 			m_soaOutputBuffer[m_sx] = rtm::vector_get_x(scale);
 			m_soaOutputBuffer[m_sy] = rtm::vector_get_y(scale);
@@ -90,19 +91,19 @@ namespace
 	public:
 		BoneTrackWriter(float* aosOutputBuffer) : m_aosOutputBuffer(aosOutputBuffer) {}
 
-		void RTM_SIMD_CALL write_rotation(uint32_t track_index, rtm::quatf_arg0 rotation)
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_rotation(uint32_t track_index, rtm::quatf_arg0 rotation)
 		{
 			(void)track_index;
 			rtm::quat_store(rotation, m_aosOutputBuffer);
 		}
 
-		void RTM_SIMD_CALL write_translation(uint32_t track_index, rtm::vector4f_arg0 translation)
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_translation(uint32_t track_index, rtm::vector4f_arg0 translation)
 		{
 			(void)track_index;
 			rtm::vector_store(translation, m_aosOutputBuffer + 4);
 		}
 
-		void RTM_SIMD_CALL write_scale(uint32_t track_index, rtm::vector4f_arg0 scale)
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_scale(uint32_t track_index, rtm::vector4f_arg0 scale)
 		{
 			(void)track_index;
 			rtm::vector_store(scale, m_aosOutputBuffer + 8);
@@ -117,7 +118,7 @@ namespace
 	public:
 		MultiFloatTrackWriter(float* outputBuffer) : m_outputBuffer(outputBuffer) {}
 
-		void RTM_SIMD_CALL write_float1(uint32_t track_index, rtm::scalarf_arg0 value)
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_float1(uint32_t track_index, rtm::scalarf_arg0 value)
 		{
 			rtm::scalar_store(value, m_outputBuffer + track_index);
 		}
@@ -131,7 +132,7 @@ namespace
 	public:
 		SingleFloatTrackWriter(float* outputBuffer) : m_output(outputBuffer) {}
 
-		void RTM_SIMD_CALL write_float1(uint32_t track_index, rtm::scalarf_arg0 value)
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_float1(uint32_t track_index, rtm::scalarf_arg0 value)
 		{
 			(void)track_index;
 			rtm::scalar_store(value, m_output);
@@ -162,12 +163,14 @@ namespace
 	using FloatDecompressionContext = decompression_context<FloatDecompressionSettings>;
 }
 
+// It is advantageous to perform as much trivial work between seek() and decompress_track[s]() because seek() prefetches.
+// There isn't much but we can at least use that to configure the writer and to clamp index values.
 ACL_UNITY_API void samplePoseAOS(const void* compressedTransformTracks, float* aosOutputBuffer, float time, unsigned char keyframeInterpolationMode)
 {
 	TransformDecompressionContext context;
-	PoseAOSTrackWriter writer(aosOutputBuffer);
 	context.initialize(*static_cast<const compressed_tracks*>(compressedTransformTracks));
 	context.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
+	PoseAOSTrackWriter writer(aosOutputBuffer);
 	context.decompress_tracks(writer);
 }
 
@@ -175,36 +178,40 @@ ACL_UNITY_API void samplePoseSOA(const void* compressedTransformTracks, float* s
 {
 	TransformDecompressionContext context;
 	context.initialize(*static_cast<const compressed_tracks*>(compressedTransformTracks));
-	PoseSOATrackWriter writer(soaOutputBuffer, context.get_compressed_tracks()->get_num_tracks());
 	context.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
+	PoseSOATrackWriter writer(soaOutputBuffer, context.get_compressed_tracks()->get_num_tracks());
 	context.decompress_tracks(writer);
 }
 
 ACL_UNITY_API void sampleBone(const void* compressedTransformTracks, float* boneQVV, int boneIndex, float time, unsigned char keyframeInterpolationMode)
 {
 	TransformDecompressionContext context;
-	BoneTrackWriter writer(boneQVV);
 	context.initialize(*static_cast<const compressed_tracks*>(compressedTransformTracks));
 	context.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
-	context.decompress_track(static_cast<uint32_t>(boneIndex), writer);
+	BoneTrackWriter writer(boneQVV);
+	uint32_t uindex = static_cast<uint32_t>(boneIndex);
+	uindex = std::min(uindex, context.get_compressed_tracks()->get_num_tracks() - 1);
+	context.decompress_track(uindex, writer);
 }
 
 ACL_UNITY_API void sampleFloats(const void* compressedFloatTracks, float* floatOutputBuffer, float time, unsigned char keyframeInterpolationMode)
 {
 	FloatDecompressionContext context;
-	MultiFloatTrackWriter writer(floatOutputBuffer);
 	context.initialize(*static_cast<const compressed_tracks*>(compressedFloatTracks));
 	context.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
+	MultiFloatTrackWriter writer(floatOutputBuffer);
 	context.decompress_tracks(writer);
 }
 
 ACL_UNITY_API float sampleFloat(const void* compressedFloatTracks, int trackIndex, float time, unsigned char keyframeInterpolationMode)
 {
 	FloatDecompressionContext context;
-	float result;
-	SingleFloatTrackWriter writer(&result);
 	context.initialize(*static_cast<const compressed_tracks*>(compressedFloatTracks));
 	context.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
-	context.decompress_track(static_cast<uint32_t>(trackIndex), writer);
+	float result;
+	SingleFloatTrackWriter writer(&result);
+	uint32_t uindex = static_cast<uint32_t>(trackIndex);
+	uindex = std::min(uindex, context.get_compressed_tracks()->get_num_tracks() - 1);
+	context.decompress_track(uindex, writer);
 	return result;
 }
