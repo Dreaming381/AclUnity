@@ -185,7 +185,7 @@ ACL_UNITY_API void* compressScalarsClip(signed short numTracks,
 	return outCompressedTracks;
 }
 
-ACL_UNITY_API void disposeCompressedTracksBuffer(void* compressedTracksBuffer, void* allocator)
+ACL_UNITY_API void disposeCompressedTracksBuffer(void* compressedTracksBuffer)
 {
 	ansi_allocator a;
 	compressed_tracks* buffer = static_cast<compressed_tracks*>(compressedTracksBuffer);

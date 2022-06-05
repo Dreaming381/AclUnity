@@ -6,6 +6,8 @@ set(ACLUNITY_USE_ACL_SUBDIR false CACHE BOOL "Add ACL via add_subdirectory which
 set(ACLUNITY_IS_AVX false CACHE BOOL "Use AVX, AVX2, BMI1, and BMI2 instructions plus SSE4 tier")
 set(ACLUNITY_IS_SSE4 false CACHE BOOL "Use SSE4.2 plus popcnt")
 
+set(ACLUNITY_MAKE_DEBUG false CACHE BOOL "Make a debug executable")
+
 file(GLOB_RECURSE src CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/*.cpp")
 #The following helps IDEs show these files in the project.
 file(GLOB_RECURSE apiHeaders "${PROJECT_SOURCE_DIR}/include*.h")
@@ -39,5 +41,15 @@ if (MSVC)
 	endif()
 endif()
 
-
-
+if (ACLUNITY_MAKE_DEBUG)
+	add_executable(debug_main "tests/debug_main.cpp")
+	if (MSVC)
+		if (ACLUNITY_IS_AVX)
+			target_link_libraries(debug_main AclUnity_AVX)
+		elseif (ACLUNITY_IS_SSE4)
+			target_link_libraries(debug_main AclUnity_SSE4)
+		else()
+			target_link_libraries(debug_main AclUnity)
+		endif()
+	endif()
+endif()

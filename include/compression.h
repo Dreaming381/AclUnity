@@ -78,5 +78,5 @@ extern "C"
 	/// Disposes a buffer generated from one of the compression functions
 	/// </summary>
 	/// <param name="compressedTracksBuffer">The buffer to dispose</param>
-	ACL_UNITY_API void disposeCompressedTracksBuffer(void* compressedTracksBuffer, void* allocator);
+	ACL_UNITY_API void disposeCompressedTracksBuffer(void* compressedTracksBuffer);
 }
