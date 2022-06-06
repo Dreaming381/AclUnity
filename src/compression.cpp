@@ -86,12 +86,15 @@ namespace
 
 				MatrixAndInverseScale objTransform;
 				MatrixAndInverseScale localTransform = localTransforms[transformIndex];
-				MatrixAndInverseScale parentObjectTransform = outObjectTransforms[parentTransformIndex];
+				
 				if (parentTransformIndex == k_invalid_track_index)
 					objTransform.matrix = localTransform.matrix;	// Just copy the root as-is, it has no parent and thus local and object space transforms are equal
 				else if (m_parentIndices[transformIndex] < 0)
+				{
 					// Todo: Need a more direct vector-matrix scaling multiply in RTM
+					MatrixAndInverseScale parentObjectTransform = outObjectTransforms[parentTransformIndex];
 					objTransform.matrix = rtm::matrix_mul(rtm::matrix_mul(localTransform.matrix, rtm::matrix_from_scale(parentObjectTransform.inverseScale)), parentObjectTransform.matrix);
+				}
 				else
 					objTransform.matrix = rtm::matrix_mul(localTransforms[transformIndex].matrix, outObjectTransforms[parentTransformIndex].matrix);
 
