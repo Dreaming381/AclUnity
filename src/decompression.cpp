@@ -8,7 +8,6 @@ namespace
 {
 	class PoseAOSTrackWriter : public track_writer
 	{
-		// Todo: Is it better to have 3 pointers rather than a constant offset?
 	private:
 		float* m_aosOutputBuffer;
 
@@ -28,6 +27,60 @@ namespace
 		RTM_FORCE_INLINE void RTM_SIMD_CALL write_scale(uint32_t track_index, rtm::vector4f_arg0 scale)
 		{
 			rtm::vector_store(scale, m_aosOutputBuffer + 12 * track_index + 8);
+		}
+	};
+
+	class PoseAOSBlendedFirstTrackWriter : public track_writer
+	{
+	private:
+		float* m_aosOutputBuffer;
+		rtm::vector4f m_blendFactor;
+
+	public:
+		PoseAOSBlendedFirstTrackWriter(float* aosOutputBuffer, float blendFactor) : m_aosOutputBuffer(aosOutputBuffer), m_blendFactor(rtm::vector_broadcast(&blendFactor)) {}
+
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_rotation(uint32_t track_index, rtm::quatf_arg0 rotation)
+		{
+			rtm::quat_store(rtm::vector_mul(rtm::quat_to_vector(rotation), m_blendFactor), m_aosOutputBuffer + 12 * track_index);
+		}
+
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_translation(uint32_t track_index, rtm::vector4f_arg0 translation)
+		{
+			rtm::vector_store(rtm::vector_mul(translation, m_blendFactor), m_aosOutputBuffer + 12 * track_index + 4);
+		}
+
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_scale(uint32_t track_index, rtm::vector4f_arg0 scale)
+		{
+			rtm::vector_store(rtm::vector_mul(scale, m_blendFactor), m_aosOutputBuffer + 12 * track_index + 8);
+		}
+	};
+
+	// Todo: RTM doesn't currently use FMA for AVX.
+	class PoseAOSBlendedAddTrackWriter : public track_writer
+	{
+	private:
+		float* m_aosOutputBuffer;
+		rtm::vector4f m_blendFactor;
+
+	public:
+		PoseAOSBlendedAddTrackWriter(float* aosOutputBuffer, float blendFactor) : m_aosOutputBuffer(aosOutputBuffer), m_blendFactor(rtm::vector_broadcast(&blendFactor)) {}
+
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_rotation(uint32_t track_index, rtm::quatf_arg0 rotation)
+		{
+			auto dst = m_aosOutputBuffer + 12 * track_index;
+			rtm::quat_store(rtm::vector_mul_add(rtm::quat_to_vector(rotation), m_blendFactor, rtm::vector_load(dst)), dst);
+		}
+
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_translation(uint32_t track_index, rtm::vector4f_arg0 translation)
+		{
+			auto dst = m_aosOutputBuffer + 12 * track_index + 4;
+			rtm::vector_store(rtm::vector_mul_add(translation, m_blendFactor, rtm::vector_load(dst)), dst);
+		}
+
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_scale(uint32_t track_index, rtm::vector4f_arg0 scale)
+		{
+			auto dst = m_aosOutputBuffer + 12 * track_index + 8;
+			rtm::vector_store(rtm::vector_mul_add(scale, m_blendFactor, rtm::vector_load(dst)), dst);
 		}
 	};
 
@@ -171,6 +224,24 @@ ACL_UNITY_API void samplePoseAOS(const void* compressedTransformTracks, float* a
 	context.initialize(*static_cast<const compressed_tracks*>(compressedTransformTracks));
 	context.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
 	PoseAOSTrackWriter writer(aosOutputBuffer);
+	context.decompress_tracks(writer);
+}
+
+ACL_UNITY_API void samplePoseAOSBlendedFirst(const void* compressedTransformTracks, float* aosOutputBuffer, float blendFactor, float time, unsigned char keyframeInterpolationMode)
+{
+	TransformDecompressionContext context;
+	context.initialize(*static_cast<const compressed_tracks*>(compressedTransformTracks));
+	context.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
+	PoseAOSBlendedFirstTrackWriter writer(aosOutputBuffer, blendFactor);
+	context.decompress_tracks(writer);
+}
+
+ACL_UNITY_API void samplePoseAOSBlendedAdd(const void* compressedTransformTracks, float* aosOutputBuffer, float blendFactor, float time, unsigned char keyframeInterpolationMode)
+{
+	TransformDecompressionContext context;
+	context.initialize(*static_cast<const compressed_tracks*>(compressedTransformTracks));
+	context.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
+	PoseAOSBlendedAddTrackWriter writer(aosOutputBuffer, blendFactor);
 	context.decompress_tracks(writer);
 }
 

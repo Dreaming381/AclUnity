@@ -24,6 +24,46 @@ extern "C"
 	ACL_UNITY_API void samplePoseAOS(const void* compressedTransformTracks, float* aosOutputBuffer, float time, unsigned char keyframeInterpolationMode);
 
 	/// <summary>
+	/// Decompresses the pose at the given sample time and stores it in AOS format, scaling each result by the blend factor
+	/// </summary>
+	/// <param name="compressedTransformTracks">The 16-byte aligned pointer to the compressed tracks data</param>
+	/// <param name="aosOutputBuffer">A pointer to the buffer where the decompressed pose should be stored. See the detailed documentation for the layout.</param>
+	/// <param name="blendFactor">A scale factor to apply to all decompressed values. Rotations are left unnormalized.</param>
+	/// <param name="time">The time at which to sample the pose in seconds</param>
+	/// <param name="keyframeInterpolationMode">The method used for interpolating between the two keyframes sampled: 
+	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
+	/// <remarks>
+	/// The resulting layout stored in aosOutputBuffer is as follows:
+	/// Where t = translation, r = rotation, s = scale, and ~ = a padding float value; a bone is stored as follows:
+	/// floats 0-3:  r.x, r.y, r.z, r.w,
+	/// floats 4-7:  t.x, t.y, t.z, ~
+	/// floats 8-11: s.x, s.y, s.z, ~
+	/// 
+	/// In total, each bone is 12 floats or 48 bytes long. So the first 12 float values correspond to bone 0, then next 12 values correspond to bone 1, ect.
+	/// </remarks>
+	ACL_UNITY_API void samplePoseAOSBlendedFirst(const void* compressedTransformTracks, float* aosOutputBuffer, float blendFactor, float time, unsigned char keyframeInterpolationMode);
+
+	/// <summary>
+	/// Decompresses the pose at the given sample time, scales each value by the blend factor, and adds it to the existing value in the buffer in AOS format
+	/// </summary>
+	/// <param name="compressedTransformTracks">The 16-byte aligned pointer to the compressed tracks data</param>
+	/// <param name="aosOutputBuffer">A pointer to the buffer where the decompressed pose should be stored. See the detailed documentation for the layout.</param>
+	/// <param name="blendFactor">A scale factor to apply to all decompressed values. Rotations are left unnormalized.</param>
+	/// <param name="time">The time at which to sample the pose in seconds</param>
+	/// <param name="keyframeInterpolationMode">The method used for interpolating between the two keyframes sampled: 
+	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
+	/// <remarks>
+	/// The resulting layout stored in aosOutputBuffer is as follows:
+	/// Where t = translation, r = rotation, s = scale, and ~ = a padding float value; a bone is stored as follows:
+	/// floats 0-3:  r.x, r.y, r.z, r.w,
+	/// floats 4-7:  t.x, t.y, t.z, ~
+	/// floats 8-11: s.x, s.y, s.z, ~
+	/// 
+	/// In total, each bone is 12 floats or 48 bytes long. So the first 12 float values correspond to bone 0, then next 12 values correspond to bone 1, ect.
+	/// </remarks>
+	ACL_UNITY_API void samplePoseAOSBlendedAdd(const void* compressedTransformTracks, float* aosOutputBuffer, float blendFactor, float time, unsigned char keyframeInterpolationMode);
+
+	/// <summary>
 	/// Decompresses the pose at the given sample time and stores it in SOA format
 	/// </summary>
 	/// <param name="compressedTransformTracks">The 16-byte aligned pointer to the compressed tracks data</param>
