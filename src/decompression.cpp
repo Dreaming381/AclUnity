@@ -55,7 +55,7 @@ namespace
 		}
 	};
 
-	// Todo: RTM doesn't currently use FMA for AVX.
+	// Note: RTM doesn't currently call out FMA for AVX. However, MSVC 2019 will generate it anyways.
 	class PoseAOSBlendedAddTrackWriter : public track_writer
 	{
 	private:
@@ -68,7 +68,11 @@ namespace
 		RTM_FORCE_INLINE void RTM_SIMD_CALL write_rotation(uint32_t track_index, rtm::quatf_arg0 rotation)
 		{
 			auto dst = m_aosOutputBuffer + 12 * track_index;
-			rtm::quat_store(rtm::vector_mul_add(rtm::quat_to_vector(rotation), m_blendFactor, rtm::vector_load(dst)), dst);
+			auto prevRot = rtm::vector_load(dst);
+			auto newRot = rtm::quat_to_vector(rotation);
+			// Todo: Is there something faster than this branch?
+			newRot = rtm::vector_dot(prevRot, newRot) < 0.0f ? rtm::vector_neg(newRot) : newRot;
+			rtm::vector_store(rtm::vector_mul_add(newRot, m_blendFactor, prevRot), dst);
 		}
 
 		RTM_FORCE_INLINE void RTM_SIMD_CALL write_translation(uint32_t track_index, rtm::vector4f_arg0 translation)
