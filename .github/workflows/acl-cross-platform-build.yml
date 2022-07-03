@@ -25,6 +25,9 @@ jobs:
           cmake --build build_linux_sse2
           cd build_linux_sse2
           mv libAclUnity.so AclUnity.so
+          objcopy --only-keep-debug AclUnity.so AclUnity.so.debug
+          strip --strip-debug AclUnity.so
+          objcopy --add-gnu-debuglink=AclUnity.so.debug AclUnity.so
           cd ..
       - name: Build linux x86 AVX
         run: |
@@ -35,6 +38,9 @@ jobs:
           cmake --build build_linux_avx
           cd build_linux_avx
           mv libAclUnity_AVX.so AclUnity_AVX.so
+          objcopy --only-keep-debug AclUnity_AVX.so AclUnity_AVX.so.debug
+          strip --strip-debug AclUnity_AVX.so
+          objcopy --add-gnu-debuglink=AclUnity_AVX.so.debug AclUnity_AVX.so
           cd ..
       - name: Upload linux artifacts
         uses: actions/upload-artifact@v3
