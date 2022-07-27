@@ -79,3 +79,48 @@ jobs:
             ./build*/**/*.dll
             ./build*/**/*.pdb
             ./build*/**/*.asm
+            
+  osx:
+    runs-on: macos-12
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+      - name: Build osx arm
+        run: |
+          mkdir build_osx_arm
+          cd build_osx_arm
+          cmake .. -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_OSX_ARCHITECTURES:STRING="arm64"
+          cd ..
+          cmake --build build_osx_arm
+          cd build_osx_arm
+          mv libAclUnity.dylib AclUnity.dylib
+          cd ..
+      - name: Build osx x86 SSE2
+        run: |
+          mkdir build_osx_x86_sse2
+          cd build_osx_x86_sse2
+          cmake .. -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_OSX_ARCHITECTURES:STRING="x86_64"
+          cd ..
+          cmake --build build_osx_x86_sse2
+          cd build_osx_x86_sse2
+          mv libAclUnity.dylib AclUnity.dylib
+          cd ..
+      - name: Build osx x86 AVX
+        run: |
+          mkdir build_osx_x86_avx
+          cd build_osx_x86_avx
+          cmake -D CMAKE_C_COMPILER=$(brew --prefix llvm@14)/bin/clang -D CMAKE_CXX_COMPILER=$(brew --prefix llvm@14)/bin/clang++ .. -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_OSX_ARCHITECTURES:STRING="x86_64" -DACLUNITY_IS_AVX:BOOL="True"
+          cd ..
+          cmake --build build_osx_x86_avx
+          cd build_osx_x86_avx
+          mv libAclUnity_AVX.dylib AclUnity_AVX.dylib
+          cd ..
+      - name: Upload osx artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: osx-artifacts
+          path: |
+            ./build*/**/*.dylib
+            ./build*/**/*.s
