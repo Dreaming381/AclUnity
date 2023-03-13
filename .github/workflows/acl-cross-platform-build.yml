@@ -64,7 +64,7 @@ jobs:
           cmake .. -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo"
           cd ..
           cmake --build build_windows_sse2 --config RelWithDebInfo
-      - name: Build linux x86 AVX
+      - name: Build windows x86 AVX
         run: |
           mkdir build_windows_avx
           cd build_windows_avx
@@ -111,7 +111,7 @@ jobs:
         run: |
           mkdir build_osx_x86_avx
           cd build_osx_x86_avx
-          cmake -D CMAKE_C_COMPILER=$(brew --prefix llvm@14)/bin/clang -D CMAKE_CXX_COMPILER=$(brew --prefix llvm@14)/bin/clang++ .. -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_OSX_ARCHITECTURES:STRING="x86_64" -DACLUNITY_IS_AVX:BOOL="True"
+          cmake .. -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_OSX_ARCHITECTURES:STRING="x86_64" -DACLUNITY_IS_AVX:BOOL="True"
           cd ..
           cmake --build build_osx_x86_avx
           cd build_osx_x86_avx
