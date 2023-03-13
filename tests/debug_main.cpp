@@ -1389,7 +1389,7 @@ void pillarTest()
 	};
 
 	int finalSize = 0;
-	void* result = compressSkeletonClip(parentIndices.data(), 6, 2, aosClipData.data(), 19, 24, 0.0001, 0.03, 0.00001, 0.00001, &finalSize);
+	void* result = compressSkeletonClip(parentIndices.data(), 6, 2, aosClipData.data(), 19, 24, 0.0001, 0.03, &finalSize, nullptr);
 	disposeCompressedTracksBuffer(result);
 }
 
@@ -16702,6 +16702,6 @@ void kawenaTest()
 	};
 
 	int finalSize = 0;
-	void* result = compressSkeletonClip(parentIndices.data(), 297, 2, aosClipData.data(), 14850 / (12 * 297), 30, 0.0001, 0.03, 0.00001, 0.00001, &finalSize);
+	void* result = compressSkeletonClip(parentIndices.data(), 297, 2, aosClipData.data(), 14850 / (12 * 297), 30, 0.0001, 0.03, &finalSize, nullptr);
 	disposeCompressedTracksBuffer(result);
 }
