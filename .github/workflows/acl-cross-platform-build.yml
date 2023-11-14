@@ -55,7 +55,7 @@ jobs:
             ./build*/**/*.s
       - name: Build Android
         run: |
-          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_TOOLCHAIN_FILE="cmake/android-toolchain.cmake" -b "build_android"
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_TOOLCHAIN_FILE="cmake/android-toolchain.cmake" -B "build_android"
           cmake --build build_android
           cd build_android
           mv libAclUnity.so AclUnity_android.so
