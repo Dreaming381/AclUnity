@@ -46,6 +46,16 @@ jobs:
           strip --strip-debug AclUnity_AVX.so
           objcopy --add-gnu-debuglink=AclUnity_AVX.so.debug AclUnity_AVX.so
           cd ..
+      - name: Build Android
+        run: |
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_TOOLCHAIN_FILE="cmake/android-toolchain.cmake" -B "build_android"
+          cmake --build build_android
+          cd build_android
+          mv libAclUnity.so AclUnity_Android.so
+          objcopy --only-keep-debug AclUnity_Android.so AclUnity_Android.so.debug
+          strip --strip-debug AclUnity_Android.so
+          objcopy --add-gnu-debuglink=AclUnity_Android.so.debug AclUnity_Android.so
+          cd ..
       - name: Upload linux artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -53,14 +63,6 @@ jobs:
           path: |
             ./build*/**/*.so*
             ./build*/**/*.s
-      - name: Build Android
-        run: |
-          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_TOOLCHAIN_FILE="cmake/android-toolchain.cmake" -B "build_android"
-          cmake --build build_android
-          cd build_android
-          mv libAclUnity.so AclUnity_android.so
-          objcopy --only-keep-debug AclUnity.android.so AclUnity.android.so.debug
-          strip
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
             
