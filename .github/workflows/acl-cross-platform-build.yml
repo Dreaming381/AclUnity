@@ -55,9 +55,14 @@ jobs:
             ./build*/**/*.s
       - name: Build Android
         run: |
-          mkdir build_android
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_TOOLCHAIN_FILE="cmake/android-toolchain.cmake" -b "build_android"
+          cmake --build build_android
           cd build_android
-          cmake .. -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -
+          mv libAclUnity.so AclUnity_android.so
+          objcopy --only-keep-debug AclUnity.android.so AclUnity.android.so.debug
+          strip
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
             
   windows:
     runs-on: windows-2019
