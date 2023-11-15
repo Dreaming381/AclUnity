@@ -52,9 +52,9 @@ jobs:
           cmake --build build_android
           cd build_android
           mv libAclUnity.so AclUnity_Android.so
-          objcopy --only-keep-debug AclUnity_Android.so AclUnity_Android.so.debug
+          llvm-objcopy --only-keep-debug AclUnity_Android.so AclUnity_Android.so.debug
           strip --strip-debug AclUnity_Android.so
-          objcopy --add-gnu-debuglink=AclUnity_Android.so.debug AclUnity_Android.so
+          llvm-objcopy --add-gnu-debuglink=AclUnity_Android.so.debug AclUnity_Android.so
           cd ..
       - name: Upload linux artifacts
         uses: actions/upload-artifact@v3
