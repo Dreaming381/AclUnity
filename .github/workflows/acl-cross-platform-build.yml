@@ -18,30 +18,12 @@ jobs:
           submodules: 'recursive'
       - name: Build linux x86 SSE2
         run: |
-          mkdir build_linux_sse2
-          cd build_linux_sse2
-          cmake .. -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_CXX_COMPILER="clang-12"
-          cd ..
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_CXX_COMPILER="clang-12" -B "build_linux_sse2"
           cmake --build build_linux_sse2
-          cd build_linux_sse2
-          mv libAclUnity.so AclUnity.so
-          objcopy --only-keep-debug AclUnity.so AclUnity.so.debug
-          strip --strip-debug AclUnity.so
-          objcopy --add-gnu-debuglink=AclUnity.so.debug AclUnity.so
-          cd ..
       - name: Build linux x86 AVX
         run: |
-          mkdir build_linux_avx
-          cd build_linux_avx
-          cmake .. -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DACLUNITY_IS_AVX:BOOL="True" -DCMAKE_CXX_COMPILER="clang-12"
-          cd ..
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DACLUNITY_IS_AVX:BOOL="True" -DCMAKE_CXX_COMPILER="clang-12" -B "build_linux_avx"
           cmake --build build_linux_avx
-          cd build_linux_avx
-          mv libAclUnity_AVX.so AclUnity_AVX.so
-          objcopy --only-keep-debug AclUnity_AVX.so AclUnity_AVX.so.debug
-          strip --strip-debug AclUnity_AVX.so
-          objcopy --add-gnu-debuglink=AclUnity_AVX.so.debug AclUnity_AVX.so
-          cd ..
       - name: Build Android
         run: |
           cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_TOOLCHAIN_FILE="cmake/android-toolchain.cmake" -B "build_android"
@@ -65,17 +47,11 @@ jobs:
           submodules: 'recursive'
       - name: Build windows x86 SSE2
         run: |
-          mkdir build_windows_sse2
-          cd build_windows_sse2
-          cmake .. -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo"
-          cd ..
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -B "build_windows_sse2"
           cmake --build build_windows_sse2 --config RelWithDebInfo
       - name: Build windows x86 AVX
         run: |
-          mkdir build_windows_avx
-          cd build_windows_avx
-          cmake .. -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DACLUNITY_IS_AVX:BOOL="True"
-          cd ..
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DACLUNITY_IS_AVX:BOOL="True" -B build_windows_avx
           cmake --build build_windows_avx --config RelWithDebInfo
       - name: Upload windows artifacts
         uses: actions/upload-artifact@v3
@@ -95,34 +71,16 @@ jobs:
           submodules: 'recursive'
       - name: Build osx arm
         run: |
-          mkdir build_osx_arm
-          cd build_osx_arm
-          cmake .. -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_OSX_ARCHITECTURES:STRING="arm64"
-          cd ..
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_OSX_ARCHITECTURES:STRING="arm64" -B build_osx_arm
           cmake --build build_osx_arm
-          cd build_osx_arm
-          mv libAclUnity.dylib AclUnity.dylib
-          cd ..
       - name: Build osx x86 SSE2
         run: |
-          mkdir build_osx_x86_sse2
-          cd build_osx_x86_sse2
-          cmake .. -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_OSX_ARCHITECTURES:STRING="x86_64"
-          cd ..
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_OSX_ARCHITECTURES:STRING="x86_64" -B build_osx_x86_sse2
           cmake --build build_osx_x86_sse2
-          cd build_osx_x86_sse2
-          mv libAclUnity.dylib AclUnity.dylib
-          cd ..
       - name: Build osx x86 AVX
         run: |
-          mkdir build_osx_x86_avx
-          cd build_osx_x86_avx
-          cmake .. -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_OSX_ARCHITECTURES:STRING="x86_64" -DACLUNITY_IS_AVX:BOOL="True"
-          cd ..
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_OSX_ARCHITECTURES:STRING="x86_64" -DACLUNITY_IS_AVX:BOOL="True" -B build_osx_x86_avx
           cmake --build build_osx_x86_avx
-          cd build_osx_x86_avx
-          mv libAclUnity_AVX.dylib AclUnity_AVX.dylib
-          cd ..
       - name: Upload osx artifacts
         uses: actions/upload-artifact@v3
         with:
