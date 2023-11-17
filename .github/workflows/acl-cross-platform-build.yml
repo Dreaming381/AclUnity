@@ -16,10 +16,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: 'recursive'
-      - name: Setup Android NDK
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r26b
       - name: Build linux x86 SSE2
         run: |
           mkdir build_linux_sse2
@@ -50,12 +46,6 @@ jobs:
         run: |
           cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_TOOLCHAIN_FILE="cmake/android-toolchain.cmake" -B "build_android"
           cmake --build build_android
-          cd build_android
-          mv libAclUnity.so AclUnity_Android.so
-          llvm-objcopy --only-keep-debug AclUnity_Android.so AclUnity_Android.so.debug
-          strip --strip-debug AclUnity_Android.so
-          llvm-objcopy --add-gnu-debuglink=AclUnity_Android.so.debug AclUnity_Android.so
-          cd ..
       - name: Upload linux artifacts
         uses: actions/upload-artifact@v3
         with:
