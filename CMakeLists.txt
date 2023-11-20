@@ -30,12 +30,12 @@ add_library(AclUnity SHARED ${src} ${apiHeaders} ${aclHeaders})
 target_include_directories(AclUnity PUBLIC "${PROJECT_SOURCE_DIR}/include" "${PROJECT_SOURCE_DIR}/acl/includes" "${PROJECT_SOURCE_DIR}/acl/external/rtm/includes")
 target_compile_features(AclUnity PUBLIC cxx_std_11)
 
-if (UNIX AND NOT APPLE)
-	add_custom_command(TARGET AclUnity POST_BUILD
-					COMMAND ${CMAKE_OBJCOPY} "--only-keep-debug" "$<TARGET_FILE:AclUnity>" "$<TARGET_FILE:AclUnity>.debug"
-					COMMAND ${CMAKE_STRIP} "--strip-debug" "$<TARGET_FILE:AclUnity>"
-					COMMAND ${CMAKE_OBJCOPY} "--add-gnu-debuglink=$<TARGET_FILE:AclUnity>.debug" "$<TARGET_FILE:AclUnity>")
-endif()
+# if (UNIX AND NOT APPLE)
+# 	add_custom_command(TARGET AclUnity POST_BUILD
+# 					COMMAND ${CMAKE_OBJCOPY} "--only-keep-debug" "$<TARGET_FILE:AclUnity>" "$<TARGET_FILE:AclUnity>.debug"
+# 					COMMAND ${CMAKE_STRIP} "--strip-debug" "$<TARGET_FILE:AclUnity>"
+# 					COMMAND ${CMAKE_OBJCOPY} "--add-gnu-debuglink=$<TARGET_FILE:AclUnity>.debug" "$<TARGET_FILE:AclUnity>")
+# endif()
 
 if (MSVC)
 	if (ACLUNITY_IS_AVX)
