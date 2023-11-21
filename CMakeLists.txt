@@ -37,6 +37,31 @@ target_compile_features(AclUnity PUBLIC cxx_std_11)
 # 					COMMAND ${CMAKE_OBJCOPY} "--add-gnu-debuglink=$<TARGET_FILE:AclUnity>.debug" "$<TARGET_FILE:AclUnity>")
 # endif()
 
+function(get_stl_info stl_path stl_name)
+   # assume app not uses shared stl lib
+   set(${stl_path} "" PARENT_SCOPE)
+   if(NOT ${ANDROID_STL} MATCHES "_shared")
+       return()
+   endif()
+
+   # using shared lib, config lib name and path
+   if("${ANDROID_STL}" MATCHES "c\\\+\\\+_")
+       # app uses c++_shared for stl type
+       set(stlPath "llvm-libc++/libs/${ANDROID_ABI}")
+       set(stlName "libc++_shared.so")
+   elseif(${ANDROID_STL} MATCHES "gnustl_")
+       set(stlPath "gnu-libstdc++/4.9/libs/${ANDROID_ABI}")
+       set(stlName "libgnustl_shared.so")
+   else()
+       # this sample not supporting other stl types
+       message(FATAL_ERROR "Not Suppored STL type: ${ANDROID_STL}")
+       return()
+   endif()
+
+   set(${stl_path} ${ANDROID_NDK}/sources/cxx-stl/${stlPath} PARENT_SCOPE)
+   set(${stl_name} ${stlName} PARENT_SCOPE)
+endfunction()
+
 if (MSVC)
 	if (ACLUNITY_IS_AVX)
 		set_target_properties(AclUnity PROPERTIES OUTPUT_NAME "AclUnity_AVX")
@@ -54,6 +79,12 @@ elseif (APPLE AND (CMAKE_OSX_ARCHITECTURES STREQUAL "arm64"))
 		target_compile_options(AclUnity PUBLIC "--save-temps=obj")
 elseif (ANDROID)
 		set_target_properties( AclUnity PROPERTIES OUTPUT_NAME "AclUnity_Android")
+		get_stl_info(ndk_stl_path ndk_stl_name)
+		add_custom_command(TARGET AclUnity PRE_BUILD
+			COMMAND "${CMAKE_COMMAND}" -E
+			copy ${ndk_stl_path}/${ndk_stl-name}
+			"${ndk_stl_name}"
+			COMMENT "Copying libc++_shared.so")
 elseif (UNIX OR APPLE)
 	if (ACLUNITY_IS_AVX)
 		set_target_properties(AclUnity PROPERTIES OUTPUT_NAME "AclUnity_AVX")
