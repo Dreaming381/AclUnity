@@ -24,10 +24,14 @@ jobs:
         run: |
           cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DACLUNITY_IS_AVX:BOOL="True" -DCMAKE_CXX_COMPILER="clang-12" -B "build_linux_avx"
           cmake --build build_linux_avx
-      - name: Build Android
+      - name: Build Android ARM64
         run: |
-          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_TOOLCHAIN_FILE="cmake/android-toolchain.cmake" -B "build_android"
-          cmake --build build_android
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_TOOLCHAIN_FILE="cmake/android-toolchain.cmake" -DCMAKE_ANDROID_ARCH_ABI="arm64-v8a" -B "build_android_arm64"
+          cmake --build build_android_arm64
+      - name: Build Android ARM7
+        run: |
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_TOOLCHAIN_FILE="cmake/android-toolchain.cmake" -DCMAKE_ANDROID_ARCH_ABI="armeabi-v7a" -B "build_android_arm7"
+          cmake --build build_android_arm7
       - name: Upload linux artifacts
         uses: actions/upload-artifact@v3
         with:
