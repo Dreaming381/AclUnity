@@ -6,6 +6,7 @@ set(ACLUNITY_USE_ACL_SUBDIR false CACHE BOOL "Add ACL via add_subdirectory which
 set(ACLUNITY_IS_AVX false CACHE BOOL "Use AVX, AVX2, BMI1, and BMI2 instructions plus SSE4 tier")
 set(ACLUNITY_IS_SSE4 false CACHE BOOL "Use SSE4.2 plus popcnt")
 
+set(ACLUNITY_KEEP_FULL_SYMBOLS false CACHE BOOL "Disables splitting debug symbols into a separate file on some platforms (Linux and Android)")
 set(ACLUNITY_MAKE_DEBUG false CACHE BOOL "Make a debug executable")
 
 file(GLOB_RECURSE src CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/*.cpp")
@@ -27,7 +28,7 @@ add_library(AclUnity SHARED ${src} ${apiHeaders} ${aclHeaders})
 target_include_directories(AclUnity PUBLIC "${PROJECT_SOURCE_DIR}/include" "${PROJECT_SOURCE_DIR}/acl/includes" "${PROJECT_SOURCE_DIR}/acl/external/rtm/includes")
 target_compile_features(AclUnity PUBLIC cxx_std_11)
 
-if (UNIX AND NOT APPLE)
+if (UNIX AND NOT APPLE AND NOT ACLUNITY_KEEP_FULL_SYMBOLS)
 	add_custom_command(TARGET AclUnity POST_BUILD
 					COMMAND ${CMAKE_OBJCOPY} "--only-keep-debug" "$<TARGET_FILE:AclUnity>" "$<TARGET_FILE:AclUnity>.debug"
 					COMMAND ${CMAKE_STRIP} "--strip-debug" "$<TARGET_FILE:AclUnity>"

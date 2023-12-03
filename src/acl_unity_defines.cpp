@@ -17,5 +17,5 @@ ACL_UNITY_API int getVersion()
 
 ACL_UNITY_API int getUnityVersion()
 {
-	return (0 << 20) | (7 << 10) | 501;
+	return (0 << 20) | (8 << 10) | 505;
 }

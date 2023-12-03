@@ -46,6 +46,16 @@ build artifacts. These artifacts contain the binaries that were copied to the
 Latios Framework, as well as debug symbols and human-readable assembly text
 files.
 
+## Platforms Supported Out-of-the-Box
+
+The following platforms are supported out-of-the-box with binaries generated via
+GitHub Actions:
+
+-   Windows
+-   Mac OS (both x86 and ARM)
+-   Linux (x86 only)
+-   Android (ARM 32-bit and 64-bit)
+
 ## Adding Platform Support for the Latios Framework
 
 Disclaimer: I am not very good with DevOps and am pretty happy I even got this
@@ -55,8 +65,7 @@ Adding support for a new platform should not require any C++ code changes.
 Instead, you will need to modify the top-level CMakeLists.txt to detect your
 target platform and specify the correct compiler flags for the different
 supported CPU architectures. The current CMakeLists.txt assumes your target
-platform is the same device that you are compiling for (either Windows or
-Linux).
+platform is the same device that you are compiling for.
 
 Once you have successfully compiled the library, import it into Unity as a
 native plugin. Depending on your target platform, you may need to modify the
