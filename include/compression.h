@@ -12,7 +12,7 @@ extern "C"
 	/// <param name="parentIndices">An array of indices to the corresponding parent bone. 
 	/// If the index is itself, it has no parent.</param>
 	/// <param name="numBones">The number of bones in the skeleton</param>
-	/// <param name="compressionLevel">The level of compression to apply. 0 = lowest, fastest; 4 = highest, slower</param>
+	/// <param name="compressionLevel">The level of compression to apply. 0 = lowest, fastest; 4 = highest, slower; 100 = automatic</param>
 	/// <param name="aosClipData">A sequence of uniformly sampled keyframe AOS poses of the animation clip. See the detailed documentation for the layout.</param>
 	/// <param name="numSamples">The number of uniformly sampled keyframe AOS poses</param>
 	/// <param name="sampleRate">The sample rate of the animation clip</param>
@@ -55,7 +55,7 @@ extern "C"
 	/// Compresses an animation clip containing multiple scalar values (tracks)
 	/// </summary>
 	/// <param name="numTracks">The number of scalar tracks to compress</param>
-	/// <param name="compressionLevel">The level of compression to apply. 0 = lowest, fastest; 4 = highest, slower</param>
+	/// <param name="compressionLevel">The level of compression to apply. 0 = lowest, fastest; 4 = highest, slower; 100 = automatic</param>
 	/// <param name="clipData">A sequence of uniformly sampled keyframe values for each scalar in the animation clip. See the detailed documentation for the layout.</param>
 	/// <param name="numSamples">The number of uniformly sampled keyframes</param>
 	/// <param name="sampleRate">The sample rate of the animation clip</param>

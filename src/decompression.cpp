@@ -93,6 +93,45 @@ namespace
 		}
 	};
 
+	class PoseMaskedTrackWriter : public PoseTrackWriter
+	{
+	private:
+		const std::uint64_t* m_mask;
+
+	public:
+		PoseMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask) : PoseTrackWriter(outputBuffer), m_mask(mask) {}
+
+		bool skip_track_rotation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) != 0; }
+		bool skip_track_translation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) != 0; }
+		bool skip_track_scale(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) != 0; }
+	};
+
+	class PoseBlendedFirstMaskedTrackWriter : public PoseBlendedFirstTrackWriter
+	{
+	private:
+		const std::uint64_t* m_mask;
+
+	public:
+		PoseBlendedFirstMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask, float blendFactor) : PoseBlendedFirstTrackWriter(outputBuffer, blendFactor), m_mask(mask) {}
+
+		bool skip_track_rotation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) != 0; }
+		bool skip_track_translation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) != 0; }
+		bool skip_track_scale(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) != 0; }
+	};
+
+	class PoseBlendedAddMaskedTrackWriter : public PoseBlendedAddTrackWriter
+	{
+	private:
+		const std::uint64_t* m_mask;
+
+	public:
+		PoseBlendedAddMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask, float blendFactor, float uniformScale) : PoseBlendedAddTrackWriter(outputBuffer, blendFactor, uniformScale), m_mask(mask) {}
+
+		bool skip_track_rotation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) != 0; }
+		bool skip_track_translation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) != 0; }
+		bool skip_track_scale(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) != 0; }
+	};
+
 	class UniformScaleTrackWriter : public track_writer
 	{
 	private:
@@ -139,6 +178,68 @@ namespace
 		}
 	};
 
+	class UniformScaleMaskedTrackWriter : public track_writer
+	{
+	private:
+		float* m_outputBuffer;
+		const std::uint64_t* m_mask;
+
+	public:
+		UniformScaleMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask) : m_outputBuffer(outputBuffer), m_mask(mask) {}
+
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_float1(uint32_t track_index, rtm::scalarf_arg0 value)
+		{
+			// Todo: Need to add track skipping to ACL for scalar tracks
+			auto ulong = m_mask[track_index >> 6];
+			bool isBitSet = (ulong & (1ull << (track_index & 0x3f))) != 0;
+			if (isBitSet)
+				rtm::scalar_store(value, m_outputBuffer + track_index * 12 + 11);
+		}
+	};
+
+	class UniformScaleBlendedFirstMaskedTrackWriter : public track_writer
+	{
+	private:
+		float* m_outputBuffer;
+		const std::uint64_t* m_mask;
+		rtm::scalarf m_blendFactor;
+
+	public:
+		UniformScaleBlendedFirstMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask, float blendFactor) : m_outputBuffer(outputBuffer), m_mask(mask), m_blendFactor(rtm::scalar_set(blendFactor)) {}
+
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_float1(uint32_t track_index, rtm::scalarf_arg0 value)
+		{
+			// Todo: Need to add track skipping to ACL for scalar tracks
+			auto ulong = m_mask[track_index >> 6];
+			bool isBitSet = (ulong & (1ull << (track_index & 0x3f))) != 0;
+			if (isBitSet)
+				rtm::scalar_store(rtm::scalar_mul(value, m_blendFactor), m_outputBuffer + track_index * 12 + 11);
+		}
+	};
+
+	class UniformScaleBlendedAddMaskedTrackWriter : public track_writer
+	{
+	private:
+		float* m_outputBuffer;
+		const std::uint64_t* m_mask;
+		rtm::scalarf m_blendFactor;
+
+	public:
+		UniformScaleBlendedAddMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask, float blendFactor) : m_outputBuffer(outputBuffer), m_mask(mask), m_blendFactor(rtm::scalar_set(blendFactor)) {}
+
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_float1(uint32_t track_index, rtm::scalarf_arg0 value)
+		{
+			// Todo: Need to add track skipping to ACL for scalar tracks
+			auto ulong = m_mask[track_index >> 6];
+			bool isBitSet = (ulong & (1ull << (track_index & 0x3f))) != 0;
+			if (isBitSet)
+			{
+				auto dst = m_outputBuffer + track_index * 12 + 11;
+				rtm::scalar_store(rtm::scalar_mul_add(value, m_blendFactor, rtm::scalar_load(dst)), dst);
+			}
+		}
+	};
+
 	class BoneTrackWriter : public track_writer
 	{
 	private:
@@ -180,6 +281,99 @@ namespace
 		}
 	};
 
+	class MultiFloatBlendedFirstTrackWriter : public track_writer
+	{
+	private:
+		float* m_outputBuffer;
+		rtm::scalarf m_blendFactor;
+
+	public:
+		MultiFloatBlendedFirstTrackWriter(float* outputBuffer, float blendFactor) : m_outputBuffer(outputBuffer), m_blendFactor(rtm::scalar_set(blendFactor)) {}
+
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_float1(uint32_t track_index, rtm::scalarf_arg0 value)
+		{
+			rtm::scalar_store(rtm::scalar_mul(value, m_blendFactor), m_outputBuffer + track_index);
+		}
+	};
+
+	class MultiFloatBlendedAddTrackWriter : public track_writer
+	{
+	private:
+		float* m_outputBuffer;
+		rtm::scalarf m_blendFactor;
+
+	public:
+		MultiFloatBlendedAddTrackWriter(float* outputBuffer, float blendFactor) : m_outputBuffer(outputBuffer), m_blendFactor(rtm::scalar_set(blendFactor)) {}
+
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_float1(uint32_t track_index, rtm::scalarf_arg0 value)
+		{
+			auto dst = m_outputBuffer + track_index;
+			rtm::scalar_store(rtm::scalar_mul_add(value, m_blendFactor, rtm::scalar_load(dst)), dst);
+		}
+	};
+
+	class MultiFloatMaskedTrackWriter : public track_writer
+	{
+	private:
+		float* m_outputBuffer;
+		const std::uint64_t* m_mask;
+
+	public:
+		MultiFloatMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask) : m_outputBuffer(outputBuffer), m_mask(mask) {}
+
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_float1(uint32_t track_index, rtm::scalarf_arg0 value)
+		{
+			// Todo: Need to add track skipping to ACL for scalar tracks
+			auto ulong = m_mask[track_index >> 6];
+			bool isBitSet = (ulong & (1ull << (track_index & 0x3f))) != 0;
+			if (isBitSet)
+				rtm::scalar_store(value, m_outputBuffer + track_index);
+		}
+	};
+
+	class MultiFloatBlendedFirstMaskedTrackWriter : public track_writer
+	{
+	private:
+		float* m_outputBuffer;
+		const std::uint64_t* m_mask;
+		rtm::scalarf m_blendFactor;
+
+	public:
+		MultiFloatBlendedFirstMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask, float blendFactor) : m_outputBuffer(outputBuffer), m_mask(mask), m_blendFactor(rtm::scalar_set(blendFactor)) {}
+
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_float1(uint32_t track_index, rtm::scalarf_arg0 value)
+		{
+			// Todo: Need to add track skipping to ACL for scalar tracks
+			auto ulong = m_mask[track_index >> 6];
+			bool isBitSet = (ulong & (1ull << (track_index & 0x3f))) != 0;
+			if (isBitSet)
+				rtm::scalar_store(rtm::scalar_mul(value, m_blendFactor), m_outputBuffer + track_index);
+		}
+	};
+
+	class MultiFloatBlendedAddMaskedTrackWriter : public track_writer
+	{
+	private:
+		float* m_outputBuffer;
+		const std::uint64_t* m_mask;
+		rtm::scalarf m_blendFactor;
+
+	public:
+		MultiFloatBlendedAddMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask, float blendFactor) : m_outputBuffer(outputBuffer), m_mask(mask), m_blendFactor(rtm::scalar_set(blendFactor)) {}
+
+		RTM_FORCE_INLINE void RTM_SIMD_CALL write_float1(uint32_t track_index, rtm::scalarf_arg0 value)
+		{
+			// Todo: Need to add track skipping to ACL for scalar tracks
+			auto ulong = m_mask[track_index >> 6];
+			bool isBitSet = (ulong & (1ull << (track_index & 0x3f))) != 0;
+			if (isBitSet)
+			{
+				auto dst = m_outputBuffer + track_index;
+				rtm::scalar_store(rtm::scalar_mul_add(value, m_blendFactor, rtm::scalar_load(dst)), dst);
+			}
+		}
+	};
+
 	class SingleFloatTrackWriter : public track_writer
 	{
 	private:
@@ -202,6 +396,9 @@ namespace
 		// The most important check is ensuring that the compressed tracks object is aligned to a 16 byte boundary.
 		// This will require custom offsets when working with BlobAssets.
 		static constexpr bool skip_initialize_safety_checks() { return true; }
+
+		// Force the version to the tagged 2.1 to decrease code size.
+		static constexpr compressed_tracks_version16 version_supported() { return compressed_tracks_version16::v02_01_00; }
 	};
 
 	using TransformDecompressionContext = decompression_context<TransformDecompressionSettings>;
@@ -214,6 +411,12 @@ namespace
 		static constexpr bool skip_initialize_safety_checks() { return true; }
 
 		static constexpr bool is_track_type_supported(track_type8 type) { return type == track_type8::float1f; }
+
+		// Force the version to the tagged 2.1 to decrease code size.
+		static constexpr compressed_tracks_version16 version_supported() { return compressed_tracks_version16::v02_01_00; }
+
+		// Todo: Make a separate variant for this when a user requests this feature.
+		static constexpr bool is_per_track_rounding_supported() { return false; }
 	};
 
 	using FloatDecompressionContext = decompression_context<FloatDecompressionSettings>;
@@ -284,6 +487,69 @@ ACL_UNITY_API void samplePoseBlendedAdd(const void* compressedTransformTracks, c
 	}
 }
 
+ACL_UNITY_API void samplePoseMasked(const void* compressedTransformTracks, const void* compressedScaleTracks, float* outputBuffer, const std::uint64_t* mask, float time, unsigned char keyframeInterpolationMode)
+{
+	TransformDecompressionContext context;
+	context.initialize(*static_cast<const compressed_tracks*>(compressedTransformTracks));
+	context.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
+	PoseMaskedTrackWriter writer(outputBuffer, mask);
+	if (compressedScaleTracks == nullptr)
+		context.decompress_tracks(writer);
+	else
+	{
+		FloatDecompressionContext scaleContext;
+		// Todo: Is initializing a context here too heavy for prefetching?
+		scaleContext.initialize(*static_cast<const compressed_tracks*>(compressedScaleTracks));
+		context.decompress_tracks(writer);
+		scaleContext.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
+		UniformScaleMaskedTrackWriter scaleWriter(outputBuffer, mask);
+		scaleContext.decompress_tracks(scaleWriter);
+	}
+}
+
+ACL_UNITY_API void samplePoseMaskedBlendedFirst(const void* compressedTransformTracks, const void* compressedScaleTracks, float* outputBuffer, const std::uint64_t* mask, float blendFactor, float time, unsigned char keyframeInterpolationMode)
+{
+	TransformDecompressionContext context;
+	context.initialize(*static_cast<const compressed_tracks*>(compressedTransformTracks));
+	context.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
+	PoseBlendedFirstMaskedTrackWriter writer(outputBuffer, mask, blendFactor);
+	if (compressedScaleTracks == nullptr)
+		context.decompress_tracks(writer);
+	else
+	{
+		FloatDecompressionContext scaleContext;
+		// Todo: Is initializing a context here too heavy for prefetching?
+		scaleContext.initialize(*static_cast<const compressed_tracks*>(compressedScaleTracks));
+		context.decompress_tracks(writer);
+		scaleContext.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
+		UniformScaleBlendedFirstMaskedTrackWriter scaleWriter(outputBuffer, mask, blendFactor);
+		scaleContext.decompress_tracks(scaleWriter);
+	}
+}
+
+ACL_UNITY_API void samplePoseMaskedBlendedAdd(const void* compressedTransformTracks, const void* compressedScaleTracks, float* outputBuffer, const std::uint64_t* mask, float blendFactor, float time, unsigned char keyframeInterpolationMode)
+{
+	TransformDecompressionContext context;
+	context.initialize(*static_cast<const compressed_tracks*>(compressedTransformTracks));
+	context.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
+	if (compressedScaleTracks == nullptr)
+	{
+		PoseBlendedAddMaskedTrackWriter writer(outputBuffer, mask, blendFactor, 1.f);
+		context.decompress_tracks(writer);
+	}
+	else
+	{
+		PoseBlendedAddTrackWriter writer(outputBuffer, blendFactor, 0.f);
+		FloatDecompressionContext scaleContext;
+		// Todo: Is initializing a context here too heavy for prefetching?
+		scaleContext.initialize(*static_cast<const compressed_tracks*>(compressedScaleTracks));
+		context.decompress_tracks(writer);
+		scaleContext.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
+		UniformScaleBlendedAddMaskedTrackWriter scaleWriter(outputBuffer, mask, blendFactor);
+		scaleContext.decompress_tracks(scaleWriter);
+	}
+}
+
 ACL_UNITY_API void sampleBone(const void* compressedTransformTracks, const void* compressedScaleTracks, float* boneQvvs, int boneIndex, float time, unsigned char keyframeInterpolationMode)
 {
 	TransformDecompressionContext context;
@@ -312,6 +578,51 @@ ACL_UNITY_API void sampleFloats(const void* compressedFloatTracks, float* floatO
 	context.initialize(*static_cast<const compressed_tracks*>(compressedFloatTracks));
 	context.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
 	MultiFloatTrackWriter writer(floatOutputBuffer);
+	context.decompress_tracks(writer);
+}
+
+ACL_UNITY_API void sampleFloatsBlendedFirst(const void* compressedFloatTracks, float* floatOutputBuffer, float blendFactor, float time, unsigned char keyframeInterpolationMode)
+{
+	FloatDecompressionContext context;
+	context.initialize(*static_cast<const compressed_tracks*>(compressedFloatTracks));
+	context.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
+	MultiFloatBlendedFirstTrackWriter writer(floatOutputBuffer, blendFactor);
+	context.decompress_tracks(writer);
+}
+
+ACL_UNITY_API void sampleFloatsBlendedAdd(const void* compressedFloatTracks, float* floatOutputBuffer, float blendFactor, float time, unsigned char keyframeInterpolationMode)
+{
+	FloatDecompressionContext context;
+	context.initialize(*static_cast<const compressed_tracks*>(compressedFloatTracks));
+	context.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
+	MultiFloatBlendedAddTrackWriter writer(floatOutputBuffer, blendFactor);
+	context.decompress_tracks(writer);
+}
+
+ACL_UNITY_API void sampleFloatsMasked(const void* compressedFloatTracks, float* floatOutputBuffer, const std::uint64_t* mask, float time, unsigned char keyframeInterpolationMode)
+{
+	FloatDecompressionContext context;
+	context.initialize(*static_cast<const compressed_tracks*>(compressedFloatTracks));
+	context.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
+	MultiFloatMaskedTrackWriter writer(floatOutputBuffer, mask);
+	context.decompress_tracks(writer);
+}
+
+ACL_UNITY_API void sampleFloatsMaskedBlendedFirst(const void* compressedFloatTracks, float* floatOutputBuffer, const std::uint64_t* mask, float blendFactor, float time, unsigned char keyframeInterpolationMode)
+{
+	FloatDecompressionContext context;
+	context.initialize(*static_cast<const compressed_tracks*>(compressedFloatTracks));
+	context.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
+	MultiFloatBlendedFirstMaskedTrackWriter writer(floatOutputBuffer, mask, blendFactor);
+	context.decompress_tracks(writer);
+}
+
+ACL_UNITY_API void sampleFloatsMaskedBlendedAdd(const void* compressedFloatTracks, float* floatOutputBuffer, const std::uint64_t* mask, float blendFactor, float time, unsigned char keyframeInterpolationMode)
+{
+	FloatDecompressionContext context;
+	context.initialize(*static_cast<const compressed_tracks*>(compressedFloatTracks));
+	context.seek(time, static_cast<sample_rounding_policy>(keyframeInterpolationMode));
+	MultiFloatBlendedAddMaskedTrackWriter writer(floatOutputBuffer, mask, blendFactor);
 	context.decompress_tracks(writer);
 }
 

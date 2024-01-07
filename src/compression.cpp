@@ -5,6 +5,7 @@
 #include "acl/compression/transform_error_metrics.h"
 #include "acl/compression/compress.h"
 #include "acl/core/ansi_allocator.h"
+#include "acl/compression/pre_process.h"
 
 using namespace acl;
 
@@ -156,9 +157,8 @@ ACL_UNITY_API void* compressSkeletonClip(const signed short* parentIndices,
 	ansi_allocator allocator;
 
 	track_array_qvvf      trackArray(allocator, static_cast<uint32_t>(numBones));
-	// Todo: make_ref should accept this input as const.
-	// Todo: Is this reinterpret undefined behavior, where using void* for aosClipData instead would be more appropriate?
-	auto*                 clipData = const_cast<rtm::qvvf*>(reinterpret_cast<const rtm::qvvf*>(aosClipData));
+	// Todo: Upgrade to C++20 to use std::bit_cast instead.
+	auto*                 clipData = reinterpret_cast<const rtm::qvvf*>(aosClipData);
 	track_desc_transformf trackDesc;
 	trackDesc.precision                      = maxDistanceError;
 	trackDesc.shell_distance                 = sampledErrorDistanceFromBone;
@@ -174,7 +174,7 @@ ACL_UNITY_API void* compressSkeletonClip(const signed short* parentIndices,
 		{
 			trackDesc.parent_index = static_cast<uint32_t>(parentIndex);
 		}
-		trackArray[i] = track_qvvf::make_ref(trackDesc, clipData + i * numSamples, static_cast<uint32_t>(numSamples), sampleRate);
+		trackArray[i] = track_qvvf::make_copy(trackDesc, allocator, clipData + i * numSamples, static_cast<uint32_t>(numSamples), sampleRate);
 	}
 
 	auto compressionSettings  = get_default_compression_settings();
@@ -186,6 +186,10 @@ ACL_UNITY_API void* compressSkeletonClip(const signed short* parentIndices,
 		compressionSettings.error_metric = &errorMetricA;
 	else
 		compressionSettings.error_metric = &errorMetricB;
+
+	pre_process_settings_t settings;
+	settings.error_metric = compressionSettings.error_metric;
+	pre_process_track_list(allocator, settings, trackArray);
 
 	compressed_tracks* outCompressedTracks = nullptr;
 	output_stats outputStats;
@@ -212,12 +216,14 @@ ACL_UNITY_API void* compressScalarsClip(signed short numTracks,
 		track_desc_scalarf trackDesc;
 		trackDesc.output_index = static_cast<uint32_t>(i);
 		trackDesc.precision    = maxErrors[i];
-		// Todo: make_ref should accept clipData input as const.
-		trackArray[i] = track_float1f::make_ref(trackDesc, const_cast<float*>(clipData) + i * numSamples, static_cast<uint32_t>(numSamples), sampleRate);
+		trackArray[i] = track_float1f::make_copy(trackDesc, allocator, clipData + i * numSamples, static_cast<uint32_t>(numSamples), sampleRate);
 	}
 
 	auto compressionSettings = get_default_compression_settings();
 	compressionSettings.level = static_cast<compression_level8>(compressionLevel);
+
+	pre_process_settings_t settings;
+	pre_process_track_list(allocator, settings, trackArray);
 
 	compressed_tracks* outCompressedTracks = nullptr;
 	output_stats outputStats;
