@@ -46,7 +46,8 @@ namespace
 
 		RTM_FORCE_INLINE void RTM_SIMD_CALL write_translation(uint32_t track_index, rtm::vector4f_arg0 translation)
 		{
-			rtm::vector_store(rtm::vector_mul(translation, m_blendFactor), m_outputBuffer + 12 * track_index + 4);
+			auto weightedTranslation = rtm::vector_set_w(translation, 1.0f);
+			rtm::vector_store(rtm::vector_mul(weightedTranslation, m_blendFactor), m_outputBuffer + 12 * track_index + 4);
 		}
 
 		RTM_FORCE_INLINE void RTM_SIMD_CALL write_scale(uint32_t track_index, rtm::vector4f_arg0 scale)
@@ -83,7 +84,8 @@ namespace
 		RTM_FORCE_INLINE void RTM_SIMD_CALL write_translation(uint32_t track_index, rtm::vector4f_arg0 translation)
 		{
 			auto dst = m_outputBuffer + 12 * track_index + 4;
-			rtm::vector_store(rtm::vector_mul_add(translation, m_blendFactor, rtm::vector_load(dst)), dst);
+			auto weightedTranslation = rtm::vector_set_w(translation, 1.0f);
+			rtm::vector_store(rtm::vector_mul_add(weightedTranslation, m_blendFactor, rtm::vector_load(dst)), dst);
 		}
 
 		RTM_FORCE_INLINE void RTM_SIMD_CALL write_scale(uint32_t track_index, rtm::vector4f_arg0 scale)

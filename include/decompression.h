@@ -36,9 +36,9 @@ extern "C"
 	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
 	/// <remarks>
 	/// The resulting layout stored in aosOutputBuffer is as follows:
-	/// Where t = translation, r = rotation, s = stretch, u = uniform scale, and ~ = a padding float value; a bone is stored as follows:
+	/// Where t = translation, r = rotation, s = stretch, u = uniform scale, and b = total accumulated blending; a bone is stored as follows:
 	/// floats 0-3:  r.x, r.y, r.z, r.w,
-	/// floats 4-7:  t.x, t.y, t.z, ~
+	/// floats 4-7:  t.x, t.y, t.z, b
 	/// floats 8-11: s.x, s.y, s.z, u
 	/// 
 	/// In total, each bone is 12 floats or 48 bytes long. So the first 12 float values correspond to bone 0, then next 12 values correspond to bone 1, ect.
@@ -57,9 +57,9 @@ extern "C"
 	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
 	/// <remarks>
 	/// The resulting layout stored in aosOutputBuffer is as follows:
-	/// Where t = translation, r = rotation, s = stretch, u = uniform scale, and ~ = a padding float value; a bone is stored as follows:
+	/// Where t = translation, r = rotation, s = stretch, u = uniform scale, and b = total accumulated blending; a bone is stored as follows:
 	/// floats 0-3:  r.x, r.y, r.z, r.w,
-	/// floats 4-7:  t.x, t.y, t.z, ~
+	/// floats 4-7:  t.x, t.y, t.z, b
 	/// floats 8-11: s.x, s.y, s.z, u
 	/// 
 	/// In total, each bone is 12 floats or 48 bytes long. So the first 12 float values correspond to bone 0, then next 12 values correspond to bone 1, ect.
@@ -100,9 +100,9 @@ extern "C"
 	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
 	/// <remarks>
 	/// The resulting layout stored in aosOutputBuffer is as follows:
-	/// Where t = translation, r = rotation, s = stretch, u = uniform scale, and ~ = a padding float value; a bone is stored as follows:
+	/// Where t = translation, r = rotation, s = stretch, u = uniform scale, and b = total accumulated blending; a bone is stored as follows:
 	/// floats 0-3:  r.x, r.y, r.z, r.w,
-	/// floats 4-7:  t.x, t.y, t.z, ~
+	/// floats 4-7:  t.x, t.y, t.z, b
 	/// floats 8-11: s.x, s.y, s.z, u
 	/// 
 	/// In total, each bone is 12 floats or 48 bytes long. So the first 12 float values correspond to bone 0, then next 12 values correspond to bone 1, ect.
@@ -122,9 +122,9 @@ extern "C"
 	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
 	/// <remarks>
 	/// The resulting layout stored in aosOutputBuffer is as follows:
-	/// Where t = translation, r = rotation, s = stretch, u = uniform scale, and ~ = a padding float value; a bone is stored as follows:
+	/// Where t = translation, r = rotation, s = stretch, u = uniform scale, and b = total accumulated blending; a bone is stored as follows:
 	/// floats 0-3:  r.x, r.y, r.z, r.w,
-	/// floats 4-7:  t.x, t.y, t.z, ~
+	/// floats 4-7:  t.x, t.y, t.z, b
 	/// floats 8-11: s.x, s.y, s.z, u
 	/// 
 	/// In total, each bone is 12 floats or 48 bytes long. So the first 12 float values correspond to bone 0, then next 12 values correspond to bone 1, ect.
