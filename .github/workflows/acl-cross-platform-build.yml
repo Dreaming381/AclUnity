@@ -22,7 +22,7 @@ jobs:
           cmake --build build_linux_sse2
       - name: Build linux x86 AVX
         run: |
-          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DACLUNITY_IS_AVX:BOOL="True" -DCMAKE_CXX_COMPILER="clang-12" -B "build_linux_avx"
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DACLUNITY_IS_AVX:BOOL="True" -DCMAKE_CXX_COMPILER="clang-18" -B "build_linux_avx"
           cmake --build build_linux_avx
       - name: Build Android ARM64
         run: |
