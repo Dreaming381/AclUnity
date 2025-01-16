@@ -18,7 +18,7 @@ jobs:
           submodules: 'recursive'
       - name: Build linux x86 SSE2
         run: |
-          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_CXX_COMPILER="clang-12" -B "build_linux_sse2"
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_CXX_COMPILER="clang-18" -B "build_linux_sse2"
           cmake --build build_linux_sse2
       - name: Build linux x86 AVX
         run: |
