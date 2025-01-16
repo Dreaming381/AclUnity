@@ -103,9 +103,9 @@ namespace
 	public:
 		PoseMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask) : PoseTrackWriter(outputBuffer), m_mask(mask) {}
 
-		bool skip_track_rotation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) != 0; }
-		bool skip_track_translation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) != 0; }
-		bool skip_track_scale(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) != 0; }
+		bool skip_track_rotation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) == 0; }
+		bool skip_track_translation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) == 0; }
+		bool skip_track_scale(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) == 0; }
 	};
 
 	class PoseBlendedFirstMaskedTrackWriter : public PoseBlendedFirstTrackWriter
@@ -116,9 +116,9 @@ namespace
 	public:
 		PoseBlendedFirstMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask, float blendFactor) : PoseBlendedFirstTrackWriter(outputBuffer, blendFactor), m_mask(mask) {}
 
-		bool skip_track_rotation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) != 0; }
-		bool skip_track_translation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) != 0; }
-		bool skip_track_scale(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) != 0; }
+		bool skip_track_rotation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) == 0; }
+		bool skip_track_translation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) == 0; }
+		bool skip_track_scale(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) == 0; }
 	};
 
 	class PoseBlendedAddMaskedTrackWriter : public PoseBlendedAddTrackWriter
@@ -129,9 +129,9 @@ namespace
 	public:
 		PoseBlendedAddMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask, float blendFactor, float uniformScale) : PoseBlendedAddTrackWriter(outputBuffer, blendFactor, uniformScale), m_mask(mask) {}
 
-		bool skip_track_rotation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) != 0; }
-		bool skip_track_translation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) != 0; }
-		bool skip_track_scale(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) != 0; }
+		bool skip_track_rotation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) == 0; }
+		bool skip_track_translation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) == 0; }
+		bool skip_track_scale(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) == 0; }
 	};
 
 	class UniformScaleTrackWriter : public track_writer
