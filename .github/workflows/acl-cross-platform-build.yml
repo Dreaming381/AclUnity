@@ -10,10 +10,10 @@ on:
 
 jobs:
   linux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Git checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: 'recursive'
       - name: Build linux x86 SSE2
@@ -33,7 +33,7 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_TOOLCHAIN_FILE="cmake/android-toolchain.cmake" -DCMAKE_ANDROID_ARCH_ABI="armeabi-v7a" -B "build_android_arm7"
           cmake --build build_android_arm7
       - name: Upload linux artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux-artifacts
           path: |
@@ -43,10 +43,10 @@ jobs:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
             
   windows:
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
       - name: Git checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: 'recursive'
       - name: Build windows x86 SSE2
@@ -58,7 +58,7 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DACLUNITY_IS_AVX:BOOL="True" -B build_windows_avx
           cmake --build build_windows_avx --config RelWithDebInfo
       - name: Upload windows artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-artifacts
           path: |
@@ -67,10 +67,10 @@ jobs:
             ./build*/**/*.asm
             
   osx:
-    runs-on: macos-12
+    runs-on: macos-14
     steps:
       - name: Git checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: 'recursive'
       - name: Build osx arm
@@ -86,7 +86,7 @@ jobs:
           cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_OSX_ARCHITECTURES:STRING="x86_64" -DACLUNITY_IS_AVX:BOOL="True" -B build_osx_x86_avx
           cmake --build build_osx_x86_avx
       - name: Upload osx artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: osx-artifacts
           path: |
