@@ -489,7 +489,7 @@ ACL_UNITY_API void samplePoseBlendedAdd(const void* compressedTransformTracks, c
 	}
 }
 
-ACL_UNITY_API void samplePoseMasked(const void* compressedTransformTracks, const void* compressedScaleTracks, float* outputBuffer, const std::uint64_t* mask, float time, unsigned char keyframeInterpolationMode)
+ACL_UNITY_API void samplePoseMasked(const void* compressedTransformTracks, const void* compressedScaleTracks, float* outputBuffer, const unsigned long long* mask, float time, unsigned char keyframeInterpolationMode)
 {
 	TransformDecompressionContext context;
 	context.initialize(*static_cast<const compressed_tracks*>(compressedTransformTracks));
@@ -509,7 +509,7 @@ ACL_UNITY_API void samplePoseMasked(const void* compressedTransformTracks, const
 	}
 }
 
-ACL_UNITY_API void samplePoseMaskedBlendedFirst(const void* compressedTransformTracks, const void* compressedScaleTracks, float* outputBuffer, const std::uint64_t* mask, float blendFactor, float time, unsigned char keyframeInterpolationMode)
+ACL_UNITY_API void samplePoseMaskedBlendedFirst(const void* compressedTransformTracks, const void* compressedScaleTracks, float* outputBuffer, const unsigned long long* mask, float blendFactor, float time, unsigned char keyframeInterpolationMode)
 {
 	TransformDecompressionContext context;
 	context.initialize(*static_cast<const compressed_tracks*>(compressedTransformTracks));
@@ -529,7 +529,7 @@ ACL_UNITY_API void samplePoseMaskedBlendedFirst(const void* compressedTransformT
 	}
 }
 
-ACL_UNITY_API void samplePoseMaskedBlendedAdd(const void* compressedTransformTracks, const void* compressedScaleTracks, float* outputBuffer, const std::uint64_t* mask, float blendFactor, float time, unsigned char keyframeInterpolationMode)
+ACL_UNITY_API void samplePoseMaskedBlendedAdd(const void* compressedTransformTracks, const void* compressedScaleTracks, float* outputBuffer, const unsigned long long* mask, float blendFactor, float time, unsigned char keyframeInterpolationMode)
 {
 	TransformDecompressionContext context;
 	context.initialize(*static_cast<const compressed_tracks*>(compressedTransformTracks));
@@ -601,7 +601,7 @@ ACL_UNITY_API void sampleFloatsBlendedAdd(const void* compressedFloatTracks, flo
 	context.decompress_tracks(writer);
 }
 
-ACL_UNITY_API void sampleFloatsMasked(const void* compressedFloatTracks, float* floatOutputBuffer, const std::uint64_t* mask, float time, unsigned char keyframeInterpolationMode)
+ACL_UNITY_API void sampleFloatsMasked(const void* compressedFloatTracks, float* floatOutputBuffer, const unsigned long long* mask, float time, unsigned char keyframeInterpolationMode)
 {
 	FloatDecompressionContext context;
 	context.initialize(*static_cast<const compressed_tracks*>(compressedFloatTracks));
@@ -610,7 +610,7 @@ ACL_UNITY_API void sampleFloatsMasked(const void* compressedFloatTracks, float* 
 	context.decompress_tracks(writer);
 }
 
-ACL_UNITY_API void sampleFloatsMaskedBlendedFirst(const void* compressedFloatTracks, float* floatOutputBuffer, const std::uint64_t* mask, float blendFactor, float time, unsigned char keyframeInterpolationMode)
+ACL_UNITY_API void sampleFloatsMaskedBlendedFirst(const void* compressedFloatTracks, float* floatOutputBuffer, const unsigned long long* mask, float blendFactor, float time, unsigned char keyframeInterpolationMode)
 {
 	FloatDecompressionContext context;
 	context.initialize(*static_cast<const compressed_tracks*>(compressedFloatTracks));
@@ -619,7 +619,7 @@ ACL_UNITY_API void sampleFloatsMaskedBlendedFirst(const void* compressedFloatTra
 	context.decompress_tracks(writer);
 }
 
-ACL_UNITY_API void sampleFloatsMaskedBlendedAdd(const void* compressedFloatTracks, float* floatOutputBuffer, const std::uint64_t* mask, float blendFactor, float time, unsigned char keyframeInterpolationMode)
+ACL_UNITY_API void sampleFloatsMaskedBlendedAdd(const void* compressedFloatTracks, float* floatOutputBuffer, const unsigned long long* mask, float blendFactor, float time, unsigned char keyframeInterpolationMode)
 {
 	FloatDecompressionContext context;
 	context.initialize(*static_cast<const compressed_tracks*>(compressedFloatTracks));
