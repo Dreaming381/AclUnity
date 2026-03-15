@@ -98,10 +98,10 @@ namespace
 	class PoseMaskedTrackWriter : public PoseTrackWriter
 	{
 	private:
-		const std::uint64_t* m_mask;
+		const unsigned long long* m_mask;
 
 	public:
-		PoseMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask) : PoseTrackWriter(outputBuffer), m_mask(mask) {}
+		PoseMaskedTrackWriter(float* outputBuffer, const unsigned long long* mask) : PoseTrackWriter(outputBuffer), m_mask(mask) {}
 
 		bool skip_track_rotation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) == 0; }
 		bool skip_track_translation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) == 0; }
@@ -111,10 +111,10 @@ namespace
 	class PoseBlendedFirstMaskedTrackWriter : public PoseBlendedFirstTrackWriter
 	{
 	private:
-		const std::uint64_t* m_mask;
+		const unsigned long long* m_mask;
 
 	public:
-		PoseBlendedFirstMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask, float blendFactor) : PoseBlendedFirstTrackWriter(outputBuffer, blendFactor), m_mask(mask) {}
+		PoseBlendedFirstMaskedTrackWriter(float* outputBuffer, const unsigned long long* mask, float blendFactor) : PoseBlendedFirstTrackWriter(outputBuffer, blendFactor), m_mask(mask) {}
 
 		bool skip_track_rotation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) == 0; }
 		bool skip_track_translation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) == 0; }
@@ -124,10 +124,10 @@ namespace
 	class PoseBlendedAddMaskedTrackWriter : public PoseBlendedAddTrackWriter
 	{
 	private:
-		const std::uint64_t* m_mask;
+		const unsigned long long* m_mask;
 
 	public:
-		PoseBlendedAddMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask, float blendFactor, float uniformScale) : PoseBlendedAddTrackWriter(outputBuffer, blendFactor, uniformScale), m_mask(mask) {}
+		PoseBlendedAddMaskedTrackWriter(float* outputBuffer, const unsigned long long* mask, float blendFactor, float uniformScale) : PoseBlendedAddTrackWriter(outputBuffer, blendFactor, uniformScale), m_mask(mask) {}
 
 		bool skip_track_rotation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) == 0; }
 		bool skip_track_translation(uint32_t track_index) const { return (m_mask[track_index >> 6] & (1ull << (track_index & 0x3f))) == 0; }
@@ -184,10 +184,10 @@ namespace
 	{
 	private:
 		float* m_outputBuffer;
-		const std::uint64_t* m_mask;
+		const unsigned long long* m_mask;
 
 	public:
-		UniformScaleMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask) : m_outputBuffer(outputBuffer), m_mask(mask) {}
+		UniformScaleMaskedTrackWriter(float* outputBuffer, const unsigned long long* mask) : m_outputBuffer(outputBuffer), m_mask(mask) {}
 
 		RTM_FORCE_INLINE void RTM_SIMD_CALL write_float1(uint32_t track_index, rtm::scalarf_arg0 value)
 		{
@@ -203,11 +203,11 @@ namespace
 	{
 	private:
 		float* m_outputBuffer;
-		const std::uint64_t* m_mask;
+		const unsigned long long* m_mask;
 		rtm::scalarf m_blendFactor;
 
 	public:
-		UniformScaleBlendedFirstMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask, float blendFactor) : m_outputBuffer(outputBuffer), m_mask(mask), m_blendFactor(rtm::scalar_set(blendFactor)) {}
+		UniformScaleBlendedFirstMaskedTrackWriter(float* outputBuffer, const unsigned long long* mask, float blendFactor) : m_outputBuffer(outputBuffer), m_mask(mask), m_blendFactor(rtm::scalar_set(blendFactor)) {}
 
 		RTM_FORCE_INLINE void RTM_SIMD_CALL write_float1(uint32_t track_index, rtm::scalarf_arg0 value)
 		{
@@ -223,11 +223,11 @@ namespace
 	{
 	private:
 		float* m_outputBuffer;
-		const std::uint64_t* m_mask;
+		const unsigned long long* m_mask;
 		rtm::scalarf m_blendFactor;
 
 	public:
-		UniformScaleBlendedAddMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask, float blendFactor) : m_outputBuffer(outputBuffer), m_mask(mask), m_blendFactor(rtm::scalar_set(blendFactor)) {}
+		UniformScaleBlendedAddMaskedTrackWriter(float* outputBuffer, const unsigned long long* mask, float blendFactor) : m_outputBuffer(outputBuffer), m_mask(mask), m_blendFactor(rtm::scalar_set(blendFactor)) {}
 
 		RTM_FORCE_INLINE void RTM_SIMD_CALL write_float1(uint32_t track_index, rtm::scalarf_arg0 value)
 		{
@@ -318,10 +318,10 @@ namespace
 	{
 	private:
 		float* m_outputBuffer;
-		const std::uint64_t* m_mask;
+		const unsigned long long* m_mask;
 
 	public:
-		MultiFloatMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask) : m_outputBuffer(outputBuffer), m_mask(mask) {}
+		MultiFloatMaskedTrackWriter(float* outputBuffer, const unsigned long long* mask) : m_outputBuffer(outputBuffer), m_mask(mask) {}
 
 		RTM_FORCE_INLINE void RTM_SIMD_CALL write_float1(uint32_t track_index, rtm::scalarf_arg0 value)
 		{
@@ -337,11 +337,11 @@ namespace
 	{
 	private:
 		float* m_outputBuffer;
-		const std::uint64_t* m_mask;
+		const unsigned long long* m_mask;
 		rtm::scalarf m_blendFactor;
 
 	public:
-		MultiFloatBlendedFirstMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask, float blendFactor) : m_outputBuffer(outputBuffer), m_mask(mask), m_blendFactor(rtm::scalar_set(blendFactor)) {}
+		MultiFloatBlendedFirstMaskedTrackWriter(float* outputBuffer, const unsigned long long* mask, float blendFactor) : m_outputBuffer(outputBuffer), m_mask(mask), m_blendFactor(rtm::scalar_set(blendFactor)) {}
 
 		RTM_FORCE_INLINE void RTM_SIMD_CALL write_float1(uint32_t track_index, rtm::scalarf_arg0 value)
 		{
@@ -357,11 +357,11 @@ namespace
 	{
 	private:
 		float* m_outputBuffer;
-		const std::uint64_t* m_mask;
+		const unsigned long long* m_mask;
 		rtm::scalarf m_blendFactor;
 
 	public:
-		MultiFloatBlendedAddMaskedTrackWriter(float* outputBuffer, const std::uint64_t* mask, float blendFactor) : m_outputBuffer(outputBuffer), m_mask(mask), m_blendFactor(rtm::scalar_set(blendFactor)) {}
+		MultiFloatBlendedAddMaskedTrackWriter(float* outputBuffer, const unsigned long long* mask, float blendFactor) : m_outputBuffer(outputBuffer), m_mask(mask), m_blendFactor(rtm::scalar_set(blendFactor)) {}
 
 		RTM_FORCE_INLINE void RTM_SIMD_CALL write_float1(uint32_t track_index, rtm::scalarf_arg0 value)
 		{
