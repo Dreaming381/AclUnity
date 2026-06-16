@@ -69,6 +69,11 @@ elseif (UNIX OR APPLE)
 	endif()
 endif()
 
+# Workaround for LLVM 19+ until ACL is updated accordingly
+if (APPLE)
+	target_compile_options(AclUnity PUBLIC "-Wno-missing-template-arg-list-after-template-kw")
+endif()
+
 if (ACLUNITY_MAKE_DEBUG)
 	add_executable(debug_main "tests/debug_main.cpp")
 	if (APPLE AND (CMAKE_OSX_ARCHITECTURES STREQUAL "arm64"))
