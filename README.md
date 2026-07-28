@@ -55,6 +55,7 @@ GitHub Actions:
 -   Mac OS (both x86 and ARM)
 -   Linux (x86 only)
 -   Android (ARM 32-bit and 64-bit)
+-   iOS (ARM64, static library)
 
 ## Adding Platform Support for the Latios Framework
 

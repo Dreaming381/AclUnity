@@ -89,10 +89,21 @@ jobs:
         run: |
           cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_OSX_ARCHITECTURES:STRING="x86_64" -DACLUNITY_IS_AVX:BOOL="True" -B build_osx_x86_avx
           cmake --build build_osx_x86_avx
+      - name: Build ios arm64
+        run: |
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_TOOLCHAIN_FILE="cmake/ios-toolchain.cmake" -B build_ios_arm64
+          cmake --build build_ios_arm64
       - name: Upload osx artifacts
         uses: actions/upload-artifact@v7
         with:
           name: osx-artifacts
           path: |
-            ./build*/**/*.dylib
-            ./build*/**/*.s
+            ./build_osx*/**/*.dylib
+            ./build_osx*/**/*.s
+      - name: Upload ios artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: ios-artifacts
+          path: |
+            ./build_ios*/**/*.a
+            ./build_ios*/**/*.s

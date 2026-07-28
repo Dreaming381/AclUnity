@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.14)
 
 project(AclUnity)
 
@@ -20,11 +20,15 @@ else()
 	file(GLOB_RECURSE aclHeaders "${PROJECT_SOURCE_DIR}/acl/includes**.h")
 endif()
 
-if (APPLE AND (CMAKE_OSX_ARCHITECTURES STREQUAL "arm64"))
+if (APPLE AND NOT CMAKE_SYSTEM_NAME STREQUAL "iOS" AND (CMAKE_OSX_ARCHITECTURES STREQUAL "arm64"))
 	set(CMAKE_OSX_DEPLOYMENT_TARGET 11.0)
 endif()
 
-add_library(AclUnity SHARED ${src} ${apiHeaders} ${aclHeaders})
+if (CMAKE_SYSTEM_NAME STREQUAL "iOS")
+	add_library(AclUnity STATIC ${src} ${apiHeaders} ${aclHeaders})
+else()
+	add_library(AclUnity SHARED ${src} ${apiHeaders} ${aclHeaders})
+endif()
 target_include_directories(AclUnity PUBLIC "${PROJECT_SOURCE_DIR}/include" "${PROJECT_SOURCE_DIR}/acl/includes" "${PROJECT_SOURCE_DIR}/acl/external/rtm/includes")
 target_compile_features(AclUnity PUBLIC cxx_std_11)
 
@@ -51,6 +55,7 @@ if (MSVC)
 	endif()
 elseif (APPLE AND (CMAKE_OSX_ARCHITECTURES STREQUAL "arm64"))
 		set(CMAKE_SHARED_LIBRARY_PREFIX "")
+		set(CMAKE_STATIC_LIBRARY_PREFIX "")
 		target_compile_options(AclUnity PUBLIC "--save-temps=obj")
 elseif (ANDROID)
 		set_target_properties( AclUnity PROPERTIES OUTPUT_NAME "AclUnity")
