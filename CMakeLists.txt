@@ -69,6 +69,13 @@ elseif (UNIX OR APPLE)
 	endif()
 endif()
 
+# GNU ld's --as-needed drops -lstdc++ when it appears before the objects/archives.
+# The Editor exports the C++ ABI itself, so the missing dependency only fails in a player.
+# Link the C++ runtime last, after the target objects, on Linux (not macOS/Android).
+if (UNIX AND NOT APPLE AND NOT ANDROID)
+	target_link_libraries(AclUnity PRIVATE stdc++)
+endif()
+
 # Workaround for LLVM 19+ until ACL is updated accordingly
 if (APPLE)
 	target_compile_options(AclUnity PUBLIC "-Wno-missing-template-arg-list-after-template-kw")
