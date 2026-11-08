@@ -69,6 +69,16 @@ elseif (UNIX OR APPLE)
 	endif()
 endif()
 
+# The Linux CI uses clang-18 as the C/C++ driver. Unlike clang++, it does not add
+# -lstdc++ implicitly, so the plugin has no DT_NEEDED entry for the C++ runtime.
+# (A driver that does add it before the objects can also lose it to --as-needed.)
+# The Editor already has libstdc++ loaded via its own dependency tree; a player does
+# not, so dlopen fails with unresolved __cxa_*/__gxx_personality_v0. Link the C++
+# runtime last on Linux only (macOS/Android use libc++/the NDK).
+if (UNIX AND NOT APPLE AND NOT ANDROID)
+	target_link_libraries(AclUnity PRIVATE stdc++)
+endif()
+
 # Workaround for LLVM 19+ until ACL is updated accordingly
 if (APPLE)
 	target_compile_options(AclUnity PUBLIC "-Wno-missing-template-arg-list-after-template-kw")

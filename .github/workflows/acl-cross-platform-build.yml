@@ -32,6 +32,15 @@ jobs:
         run: |
           cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_TOOLCHAIN_FILE="cmake/android-toolchain.cmake" -DCMAKE_ANDROID_ARCH_ABI="armeabi-v7a" -B "build_android_arm7"
           cmake --build build_android_arm7
+      - name: Verify Linux C++ runtime dependency
+        run: |
+          set -euo pipefail
+          for so in $(find build_linux_sse2 build_linux_avx -name '*.so' -type f); do
+            echo "Checking $so"
+            readelf -d "$so" | grep -q 'libstdc++'
+            ldd -r "$so"
+            python3 -c "import ctypes; ctypes.CDLL('$so')"
+          done
       - name: Upload linux artifacts
         uses: actions/upload-artifact@v7
         with:
