@@ -211,3 +211,16 @@ jobs:
         with:
           name: determinism-osx-arm64
           path: determinism_*.txt
+      - name: Check osx minimum versions
+        if: always()
+        run: |
+          status=0
+          for f in build_osx_*/*AclUnity*.dylib; do
+            minos=$(vtool -show-build "$f" | awk '$1 == "minos" {print $2}')
+            echo "$f requires macOS $minos"
+            if [ "$minos" != "11.0" ]; then
+              echo "::error::$f requires macOS $minos instead of 11.0"
+              status=1
+            fi
+          done
+          exit $status

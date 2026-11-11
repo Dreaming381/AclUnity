@@ -24,7 +24,8 @@ else()
 	file(GLOB_RECURSE aclHeaders "${PROJECT_SOURCE_DIR}/acl/includes**.h")
 endif()
 
-if (APPLE AND NOT CMAKE_SYSTEM_NAME STREQUAL "iOS" AND (CMAKE_OSX_ARCHITECTURES STREQUAL "arm64"))
+# Without an explicit target, the binaries require the build machine's macOS version.
+if (APPLE AND NOT CMAKE_SYSTEM_NAME STREQUAL "iOS")
 	set(CMAKE_OSX_DEPLOYMENT_TARGET 11.0)
 endif()
 
