@@ -20,6 +20,11 @@
 	#define ACL_UNITY_NOINLINE __attribute__((noinline))
 #endif
 
+// ACL uses _lzcnt_u32 with ACL_USE_POPCOUNT but relies on RTM to include its header, which RTM_NO_INTRINSICS skips.
+#if defined(ACL_USE_POPCOUNT)
+	#include <immintrin.h>
+#endif
+
 #define ACL_UNITY_SAMPLE_NAME(name) name##DeterministicInner
 #define ACL_UNITY_SAMPLE_API static ACL_UNITY_NOINLINE
 #include "decompression_impl.h"

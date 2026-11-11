@@ -18,6 +18,12 @@ for lib in "$@"; do
 	echo "Highest glibc symbol version required: $required"
 	if [ "$(printf '%s\n%s\n' "$MAX_GLIBC" "$required" | sort -V | tail -n 1)" != "$MAX_GLIBC" ]; then
 		echo "::error::$lib requires $required, newer than $MAX_GLIBC"
+		echo "Symbols requiring a newer glibc:"
+		objdump -T "$lib" | awk '/GLIBC_/ { match($0, /GLIBC_[0-9.]+/); print substr($0, RSTART, RLENGTH), $NF }' | while read -r version name; do
+			if [ "$(printf '%s\n%s\n' "$MAX_GLIBC" "$version" | sort -V | tail -n 1)" != "$MAX_GLIBC" ]; then
+				echo "  $version $name"
+			fi
+		done
 		status=1
 	fi
 

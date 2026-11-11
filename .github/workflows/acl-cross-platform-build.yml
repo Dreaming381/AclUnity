@@ -9,11 +9,12 @@ on:
       - '**/*.md'
 
 env:
-  CLANG_VERSION: 21
+  # The Linux runner's glibc version is the oldest glibc the plugin can load on, so Linux builds use the oldest supported image.
+  CLANG_VERSION: 18
 
 jobs:
   linux:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Git checkout
         uses: actions/checkout@v7
@@ -35,8 +36,6 @@ jobs:
         run: |
           cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_TOOLCHAIN_FILE="cmake/android-toolchain.cmake" -DCMAKE_ANDROID_ARCH_ABI="armeabi-v7a" -B "build_android_arm7"
           cmake --build build_android_arm7
-      - name: Check linux library dependencies
-        run: bash tests/check_linux_dependencies.sh build_linux_sse2/libAclUnity.so build_linux_avx/libAclUnity_AVX.so
       - name: Upload linux artifacts
         uses: actions/upload-artifact@v7
         with:
@@ -58,9 +57,12 @@ jobs:
         with:
           name: determinism-linux-x64
           path: determinism_*.txt
+      - name: Check linux library dependencies
+        if: always()
+        run: bash tests/check_linux_dependencies.sh build_linux_sse2/libAclUnity.so build_linux_avx/libAclUnity_AVX.so
 
   linux-arm:
-    runs-on: ubuntu-26.04-arm
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Git checkout
         uses: actions/checkout@v7
@@ -70,8 +72,6 @@ jobs:
         run: |
           cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_C_COMPILER="clang-$CLANG_VERSION" -DCMAKE_CXX_COMPILER="clang++-$CLANG_VERSION" -DACLUNITY_MAKE_TESTS:BOOL="True" -B "build_linux_arm64"
           cmake --build build_linux_arm64
-      - name: Check linux library dependencies
-        run: bash tests/check_linux_dependencies.sh build_linux_arm64/libAclUnity.so
       - name: Upload linux ARM64 artifacts
         uses: actions/upload-artifact@v7
         with:
@@ -89,6 +89,9 @@ jobs:
         with:
           name: determinism-linux-arm64
           path: determinism_*.txt
+      - name: Check linux library dependencies
+        if: always()
+        run: bash tests/check_linux_dependencies.sh build_linux_arm64/libAclUnity.so
 
   windows:
     runs-on: windows-2025-vs2026
