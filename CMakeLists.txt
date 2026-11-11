@@ -52,9 +52,9 @@ else()
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	# Unity does not guarantee libstdc++ is loaded or recent enough, so link it statically and keep its symbols private.
-	# --no-undefined turns any unresolved symbol into a link error instead of a load failure on the user's machine.
-	target_link_options(AclUnity PRIVATE "-static-libstdc++" "-Wl,--exclude-libs,ALL" "-Wl,--no-undefined")
+	# --no-undefined turns any unresolved symbol (such as a missing C++ runtime) into a link error instead of a load failure on the user's machine.
+	# libstdc++ stays dynamic: a static copy carries the build machine's glibc requirements with it.
+	target_link_options(AclUnity PRIVATE "-Wl,--no-undefined")
 endif()
 
 if (UNIX AND NOT APPLE AND NOT ACLUNITY_KEEP_FULL_SYMBOLS)

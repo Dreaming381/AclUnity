@@ -1,31 +1,49 @@
 #!/bin/bash
-# Fails if a Linux build of the plugin depends on the C++ runtime or on a newer glibc than Ubuntu 22.04 provides.
+# Fails if a Linux build of the plugin needs newer system libraries than Ubuntu 22.04 provides (glibc 2.35, GCC 12's libstdc++),
+# depends on libc++, does not link the C++ runtime it uses, or exports symbols outside the AclUnity API.
 # usage: check_linux_dependencies.sh <library.so>...
 
-MAX_GLIBC="GLIBC_2.35"
 status=0
 
-for lib in "$@"; do
-	echo "== $lib"
-	readelf -d "$lib" | grep NEEDED
-
-	if readelf -d "$lib" | grep NEEDED | grep -q 'libstdc++\|libc++'; then
-		echo "::error::$lib depends on a shared C++ runtime"
-		status=1
+# usage: check_max_version <library> <symbol version prefix> <highest allowed version>
+check_max_version() {
+	local lib=$1 prefix=$2 max=$3
+	local required
+	required=$(objdump -T "$lib" | grep -o "${prefix}[0-9][0-9.]*" | sort -u -V | tail -n 1)
+	if [ -z "$required" ]; then
+		echo "No ${prefix} symbol versions required"
+		return
 	fi
-
-	required=$(objdump -T "$lib" | grep -o 'GLIBC_[0-9][0-9.]*' | sort -u -V | tail -n 1)
-	echo "Highest glibc symbol version required: $required"
-	if [ "$(printf '%s\n%s\n' "$MAX_GLIBC" "$required" | sort -V | tail -n 1)" != "$MAX_GLIBC" ]; then
-		echo "::error::$lib requires $required, newer than $MAX_GLIBC"
-		echo "Symbols requiring a newer glibc:"
-		objdump -T "$lib" | awk '/GLIBC_/ { match($0, /GLIBC_[0-9.]+/); print substr($0, RSTART, RLENGTH), $NF }' | while read -r version name; do
-			if [ "$(printf '%s\n%s\n' "$MAX_GLIBC" "$version" | sort -V | tail -n 1)" != "$MAX_GLIBC" ]; then
+	echo "Highest ${prefix} symbol version required: $required"
+	if [ "$(printf '%s\n%s\n' "$max" "$required" | sort -V | tail -n 1)" != "$max" ]; then
+		echo "::error::$lib requires $required, newer than $max"
+		echo "Symbols requiring a newer version:"
+		objdump -T "$lib" | awk -v pattern="${prefix}[0-9.]+" '$0 ~ pattern { match($0, pattern); print substr($0, RSTART, RLENGTH), $NF }' | while read -r version name; do
+			if [ "$(printf '%s\n%s\n' "$max" "$version" | sort -V | tail -n 1)" != "$max" ]; then
 				echo "  $version $name"
 			fi
 		done
 		status=1
 	fi
+}
+
+for lib in "$@"; do
+	echo "== $lib"
+	needed=$(readelf -d "$lib" | grep NEEDED)
+	echo "$needed"
+
+	if echo "$needed" | grep -q 'libc++'; then
+		echo "::error::$lib depends on libc++, which is not installed on most distributions"
+		status=1
+	fi
+	if objdump -T "$lib" | grep -q '\*UND\*.*__cxa_\|\*UND\*.*__gxx_personality' && ! echo "$needed" | grep -q 'libstdc++'; then
+		echo "::error::$lib uses the C++ runtime but does not link libstdc++"
+		status=1
+	fi
+
+	check_max_version "$lib" "GLIBC_" "GLIBC_2.35"
+	check_max_version "$lib" "GLIBCXX_" "GLIBCXX_3.4.30"
+	check_max_version "$lib" "CXXABI_" "CXXABI_1.3.13"
 
 	exported=$(objdump -T "$lib" | awk '$2 == "g" && $4 == ".text" {print $NF}' | sort)
 	echo "Exported functions: $(echo "$exported" | wc -l)"
