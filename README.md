@@ -51,11 +51,41 @@ files.
 The following platforms are supported out-of-the-box with binaries generated via
 GitHub Actions:
 
--   Windows
+-   Windows (x86 and ARM64)
 -   Mac OS (both x86 and ARM)
 -   Linux (x86 only)
 -   Android (ARM 32-bit and 64-bit)
 -   iOS (ARM64, static library)
+
+## Deterministic Decompression
+
+Every sampling function has a variant with a `Deterministic` suffix. For the
+same compressed data and the same inputs, these produce bit-identical results
+on every platform and in every binary (SSE2, AVX, ARM64, ARMv7), which makes
+them suitable for lockstep simulations and jobs using
+`FloatMode.Deterministic`. They are compiled from the same code as the regular
+functions, but with ACL and RTM using their scalar implementations and with
+floating-point contraction disabled, so they never use fused multiply-add or
+hardware reciprocal estimates. Each call temporarily switches to round-to-nearest
+with IEEE denormal handling if the caller's floating-point environment differs,
+so the results do not depend on the caller's flush or rounding modes. The
+outputs may contain denormals. Burst's `FloatMode.Deterministic` flushes
+denormals differently on x86 (FTZ only) and ARM (FZ, which also treats denormal
+inputs as zero), so Burst callers should flush the outputs to zero before using
+them.
+
+The results are not bit-identical to the regular functions, and sampling a full
+pose is roughly twice as slow. Compression is not deterministic across
+platforms, so the compressed data itself must be shared (for example, baked
+once).
+
+The determinism is checked in GitHub Actions on every platform that can run
+code natively. `tests/determinism_test.cpp` decompresses the clips in
+`tests/data` and compares hashes of the results against
+`tests/data/expected_hashes.txt`, once in the default floating-point
+environment, once with the flush mode Burst's `FloatMode.Deterministic` sets,
+and once with every flush mode enabled plus round-toward-zero. Configure with `-DACLUNITY_MAKE_TESTS=ON` to
+build it.
 
 ## Adding Platform Support for the Latios Framework
 

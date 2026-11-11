@@ -1,9 +1,14 @@
 #pragma once
 
 #if _MSC_VER
-#define ACL_UNITY_API __declspec(dllexport)
+	#if defined(ACL_UNITY_BUILD)
+		#define ACL_UNITY_API __declspec(dllexport)
+	#else
+		#define ACL_UNITY_API __declspec(dllimport)
+	#endif
 #else
-#define ACL_UNITY_API
+	// The library builds with hidden visibility, so only the API is exported.
+	#define ACL_UNITY_API __attribute__((visibility("default")))
 #endif
 
 extern "C"

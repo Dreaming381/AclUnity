@@ -12,7 +12,7 @@ extern "C"
 	/// <param name="aosOutputBuffer">A pointer to the buffer where the decompressed pose should be stored. See the detailed documentation for the layout.</param>
 	/// <param name="time">The time at which to sample the pose in seconds</param>
 	/// <param name="keyframeInterpolationMode">The method used for interpolating between the two keyframes sampled: 
-	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
+	/// 0 = lerp, 1 = round to previous sample, 2 = round to next sample, 3 = round to nearest sample</param>
 	/// <remarks>
 	/// The resulting layout stored in aosOutputBuffer is as follows:
 	/// Where t = translation, r = rotation, s = stretch, u = uniform scale, and ~ = a padding float value; a bone is stored as follows:
@@ -33,7 +33,7 @@ extern "C"
 	/// <param name="blendFactor">A scale factor to apply to all decompressed values. Rotations are left unnormalized.</param>
 	/// <param name="time">The time at which to sample the pose in seconds</param>
 	/// <param name="keyframeInterpolationMode">The method used for interpolating between the two keyframes sampled: 
-	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
+	/// 0 = lerp, 1 = round to previous sample, 2 = round to next sample, 3 = round to nearest sample</param>
 	/// <remarks>
 	/// The resulting layout stored in aosOutputBuffer is as follows:
 	/// Where t = translation, r = rotation, s = stretch, u = uniform scale, and b = total accumulated blending; a bone is stored as follows:
@@ -54,7 +54,7 @@ extern "C"
 	/// <param name="blendFactor">A scale factor to apply to all decompressed values. Rotations are left unnormalized.</param>
 	/// <param name="time">The time at which to sample the pose in seconds</param>
 	/// <param name="keyframeInterpolationMode">The method used for interpolating between the two keyframes sampled: 
-	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
+	/// 0 = lerp, 1 = round to previous sample, 2 = round to next sample, 3 = round to nearest sample</param>
 	/// <remarks>
 	/// The resulting layout stored in aosOutputBuffer is as follows:
 	/// Where t = translation, r = rotation, s = stretch, u = uniform scale, and b = total accumulated blending; a bone is stored as follows:
@@ -75,7 +75,7 @@ extern "C"
 	/// <param name="mask">A pointer to bitmask represented by an array of unsigned 64 bit integers where the bone indices corresponding to set bits are sampled.</param>
 	/// <param name="time">The time at which to sample the pose in seconds</param>
 	/// <param name="keyframeInterpolationMode">The method used for interpolating between the two keyframes sampled: 
-	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
+	/// 0 = lerp, 1 = round to previous sample, 2 = round to next sample, 3 = round to nearest sample</param>
 	/// <remarks>
 	/// The resulting layout stored in aosOutputBuffer is as follows:
 	/// Where t = translation, r = rotation, s = stretch, u = uniform scale, and ~ = a padding float value; a bone is stored as follows:
@@ -97,7 +97,7 @@ extern "C"
 	/// <param name="blendFactor">A scale factor to apply to all decompressed values. Rotations are left unnormalized.</param>
 	/// <param name="time">The time at which to sample the pose in seconds</param>
 	/// <param name="keyframeInterpolationMode">The method used for interpolating between the two keyframes sampled: 
-	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
+	/// 0 = lerp, 1 = round to previous sample, 2 = round to next sample, 3 = round to nearest sample</param>
 	/// <remarks>
 	/// The resulting layout stored in aosOutputBuffer is as follows:
 	/// Where t = translation, r = rotation, s = stretch, u = uniform scale, and b = total accumulated blending; a bone is stored as follows:
@@ -119,7 +119,7 @@ extern "C"
 	/// <param name="blendFactor">A scale factor to apply to all decompressed values. Rotations are left unnormalized.</param>
 	/// <param name="time">The time at which to sample the pose in seconds</param>
 	/// <param name="keyframeInterpolationMode">The method used for interpolating between the two keyframes sampled: 
-	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
+	/// 0 = lerp, 1 = round to previous sample, 2 = round to next sample, 3 = round to nearest sample</param>
 	/// <remarks>
 	/// The resulting layout stored in aosOutputBuffer is as follows:
 	/// Where t = translation, r = rotation, s = stretch, u = uniform scale, and b = total accumulated blending; a bone is stored as follows:
@@ -140,7 +140,7 @@ extern "C"
 	/// <param name="boneIndex">The individual bone in the skeleton that should be sampled</param>
 	/// <param name="time">The time at which to sample the pose in seconds</param>
 	/// <param name="keyframeInterpolationMode">The method used for interpolating between the two keyframes sampled: 
-	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
+	/// 0 = lerp, 1 = round to previous sample, 2 = round to next sample, 3 = round to nearest sample</param>
 	/// <remarks>
 	/// The resulting layout stored in boneQVV is as follows:
 	/// Where t = translation, r = rotation, s = stretch, u = uniform scale, and ~ = a padding float value; the bone is stored as follows:
@@ -160,7 +160,7 @@ extern "C"
 	/// Each track stores a single float value at its respective index.</param>
 	/// <param name="time">The time at which to sample the pose in seconds</param>
 	/// <param name="keyframeInterpolationMode">The method used for interpolating between the two keyframes sampled: 
-	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
+	/// 0 = lerp, 1 = round to previous sample, 2 = round to next sample, 3 = round to nearest sample</param>
 	ACL_UNITY_API void sampleFloats(const void* compressedFloatTracks, float* floatOutputBuffer, float time, unsigned char keyframeInterpolationMode);
 
 	/// <summary>
@@ -171,7 +171,7 @@ extern "C"
 	/// Each track stores a single float value at its respective index.</param>
 	/// <param name="time">The time at which to sample the pose in seconds</param>
 	/// <param name="keyframeInterpolationMode">The method used for interpolating between the two keyframes sampled: 
-	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
+	/// 0 = lerp, 1 = round to previous sample, 2 = round to next sample, 3 = round to nearest sample</param>
 	ACL_UNITY_API void sampleFloatsBlendedFirst(const void* compressedFloatTracks, float* floatOutputBuffer, float blendFactor, float time, unsigned char keyframeInterpolationMode);
 
 	/// <summary>
@@ -183,7 +183,7 @@ extern "C"
 	/// <param name="mask">A pointer to bitmask represented by an array of unsigned 64 bit integers where the track indices corresponding to set bits are sampled.</param>
 	/// <param name="time">The time at which to sample the pose in seconds</param>
 	/// <param name="keyframeInterpolationMode">The method used for interpolating between the two keyframes sampled: 
-	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
+	/// 0 = lerp, 1 = round to previous sample, 2 = round to next sample, 3 = round to nearest sample</param>
 	ACL_UNITY_API void sampleFloatsBlendedAdd(const void* compressedFloatTracks, float* floatOutputBuffer, float blendFactor, float time, unsigned char keyframeInterpolationMode);
 
 	/// <summary>
@@ -195,7 +195,7 @@ extern "C"
 	/// <param name="mask">A pointer to bitmask represented by an array of unsigned 64 bit integers where the track indices corresponding to set bits are sampled.</param>
 	/// <param name="time">The time at which to sample the pose in seconds</param>
 	/// <param name="keyframeInterpolationMode">The method used for interpolating between the two keyframes sampled: 
-	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
+	/// 0 = lerp, 1 = round to previous sample, 2 = round to next sample, 3 = round to nearest sample</param>
 	ACL_UNITY_API void sampleFloatsMasked(const void* compressedFloatTracks, float* floatOutputBuffer, const unsigned long long* mask, float time, unsigned char keyframeInterpolationMode);
 
 	/// <summary>
@@ -207,7 +207,7 @@ extern "C"
 	/// <param name="mask">A pointer to bitmask represented by an array of unsigned 64 bit integers where the track indices corresponding to set bits are sampled.</param>
 	/// <param name="time">The time at which to sample the pose in seconds</param>
 	/// <param name="keyframeInterpolationMode">The method used for interpolating between the two keyframes sampled: 
-	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
+	/// 0 = lerp, 1 = round to previous sample, 2 = round to next sample, 3 = round to nearest sample</param>
 	ACL_UNITY_API void sampleFloatsMaskedBlendedFirst(const void* compressedFloatTracks, float* floatOutputBuffer, const unsigned long long* mask, float blendFactor, float time, unsigned char keyframeInterpolationMode);
 
 	/// <summary>
@@ -220,7 +220,7 @@ extern "C"
 	/// <param name="mask">A pointer to bitmask represented by an array of unsigned 64 bit integers where the track indices corresponding to set bits are sampled.</param>
 	/// <param name="time">The time at which to sample the pose in seconds</param>
 	/// <param name="keyframeInterpolationMode">The method used for interpolating between the two keyframes sampled: 
-	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
+	/// 0 = lerp, 1 = round to previous sample, 2 = round to next sample, 3 = round to nearest sample</param>
 	ACL_UNITY_API void sampleFloatsMaskedBlendedAdd(const void* compressedFloatTracks, float* floatOutputBuffer, const unsigned long long* mask, float blendFactor, float time, unsigned char keyframeInterpolationMode);
 
 	/// <summary>
@@ -230,7 +230,32 @@ extern "C"
 	/// <param name="trackIndex">The individual track index that should be sampled</param>
 	/// <param name="time">The time at which to sample the pose in seconds</param>
 	/// <param name="keyframeInterpolationMode">The method used for interpolating between the two keyframes sampled: 
-	/// 0 = lerp, 1 = round to next sample, 2 = round to previous sample, 3 = round to nearest sample</param>
+	/// 0 = lerp, 1 = round to previous sample, 2 = round to next sample, 3 = round to nearest sample</param>
 	/// <returns>The sampled value for the specified track</returns>
 	ACL_UNITY_API float sampleFloat(const void* compressedFloatTracks, int trackIndex, float time, unsigned char keyframeInterpolationMode);
+
+	// Deterministic variants
+	// Each function below has the same arguments and output layout as its counterpart without the Deterministic suffix.
+	// For identical inputs (including the bit pattern of the time and blend factor), the outputs are bit-identical on every platform
+	// and every CPU feature level (all binaries of this library). Padding values marked ~ in the layouts above are not covered.
+	// Each function runs with round-to-nearest and IEEE denormal handling regardless of the caller's floating-point environment,
+	// and restores the caller's environment before returning. Switching costs a little when the caller's environment differs.
+	// Outputs may contain denormals. Callers whose own math flushes denormals (such as Burst's FloatMode.Deterministic, which
+	// flushes differently on x86 and ARM) should flush the outputs themselves before using them.
+	// The results are not bit-identical to the non-deterministic functions, and these functions are slower.
+
+	ACL_UNITY_API void samplePoseDeterministic(const void* compressedTransformTracks, const void* compressedScaleTracks, float* aosOutputBuffer, float time, unsigned char keyframeInterpolationMode);
+	ACL_UNITY_API void samplePoseBlendedFirstDeterministic(const void* compressedTransformTracks, const void* compressedScaleTracks, float* aosOutputBuffer, float blendFactor, float time, unsigned char keyframeInterpolationMode);
+	ACL_UNITY_API void samplePoseBlendedAddDeterministic(const void* compressedTransformTracks, const void* compressedScaleTracks, float* aosOutputBuffer, float blendFactor, float time, unsigned char keyframeInterpolationMode);
+	ACL_UNITY_API void samplePoseMaskedDeterministic(const void* compressedTransformTracks, const void* compressedScaleTracks, float* outputBuffer, const unsigned long long* mask, float time, unsigned char keyframeInterpolationMode);
+	ACL_UNITY_API void samplePoseMaskedBlendedFirstDeterministic(const void* compressedTransformTracks, const void* compressedScaleTracks, float* outputBuffer, const unsigned long long* mask, float blendFactor, float time, unsigned char keyframeInterpolationMode);
+	ACL_UNITY_API void samplePoseMaskedBlendedAddDeterministic(const void* compressedTransformTracks, const void* compressedScaleTracks, float* outputBuffer, const unsigned long long* mask, float blendFactor, float time, unsigned char keyframeInterpolationMode);
+	ACL_UNITY_API void sampleBoneDeterministic(const void* compressedTransformTracks, const void* compressedScaleTracks, float* boneQvvs, int boneIndex, float time, unsigned char keyframeInterpolationMode);
+	ACL_UNITY_API void sampleFloatsDeterministic(const void* compressedFloatTracks, float* floatOutputBuffer, float time, unsigned char keyframeInterpolationMode);
+	ACL_UNITY_API void sampleFloatsBlendedFirstDeterministic(const void* compressedFloatTracks, float* floatOutputBuffer, float blendFactor, float time, unsigned char keyframeInterpolationMode);
+	ACL_UNITY_API void sampleFloatsBlendedAddDeterministic(const void* compressedFloatTracks, float* floatOutputBuffer, float blendFactor, float time, unsigned char keyframeInterpolationMode);
+	ACL_UNITY_API void sampleFloatsMaskedDeterministic(const void* compressedFloatTracks, float* floatOutputBuffer, const unsigned long long* mask, float time, unsigned char keyframeInterpolationMode);
+	ACL_UNITY_API void sampleFloatsMaskedBlendedFirstDeterministic(const void* compressedFloatTracks, float* floatOutputBuffer, const unsigned long long* mask, float blendFactor, float time, unsigned char keyframeInterpolationMode);
+	ACL_UNITY_API void sampleFloatsMaskedBlendedAddDeterministic(const void* compressedFloatTracks, float* floatOutputBuffer, const unsigned long long* mask, float blendFactor, float time, unsigned char keyframeInterpolationMode);
+	ACL_UNITY_API float sampleFloatDeterministic(const void* compressedFloatTracks, int trackIndex, float time, unsigned char keyframeInterpolationMode);
 }

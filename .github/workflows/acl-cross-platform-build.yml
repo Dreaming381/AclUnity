@@ -8,21 +8,24 @@ on:
       - docs/**
       - '**/*.md'
 
+env:
+  CLANG_VERSION: 21
+
 jobs:
   linux:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
       - name: Git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           submodules: 'recursive'
       - name: Build linux x86 SSE2
         run: |
-          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_C_COMPILER="clang-18" -DCMAKE_CXX_COMPILER="clang-18" -B "build_linux_sse2"
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_C_COMPILER="clang-$CLANG_VERSION" -DCMAKE_CXX_COMPILER="clang++-$CLANG_VERSION" -DACLUNITY_MAKE_TESTS:BOOL="True" -B "build_linux_sse2"
           cmake --build build_linux_sse2
       - name: Build linux x86 AVX
         run: |
-          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DACLUNITY_IS_AVX:BOOL="True" -DCMAKE_C_COMPILER="clang-18" -DCMAKE_CXX_COMPILER="clang-18" -B "build_linux_avx"
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DACLUNITY_IS_AVX:BOOL="True" -DCMAKE_C_COMPILER="clang-$CLANG_VERSION" -DCMAKE_CXX_COMPILER="clang++-$CLANG_VERSION" -DACLUNITY_MAKE_TESTS:BOOL="True" -B "build_linux_avx"
           cmake --build build_linux_avx
       - name: Build Android ARM64
         run: |
@@ -32,54 +35,142 @@ jobs:
         run: |
           cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_TOOLCHAIN_FILE="cmake/android-toolchain.cmake" -DCMAKE_ANDROID_ARCH_ABI="armeabi-v7a" -B "build_android_arm7"
           cmake --build build_android_arm7
+      - name: Check linux library dependencies
+        run: bash tests/check_linux_dependencies.sh build_linux_sse2/libAclUnity.so build_linux_avx/libAclUnity_AVX.so
       - name: Upload linux artifacts
         uses: actions/upload-artifact@v7
         with:
           name: linux-artifacts
           path: |
-            ./build*/**/*.so*
-            ./build*/**/*.s
-        env:
-          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-            
+            ./build*/libAclUnity*.so*
+            ./build*/**/AclUnity.dir/**/*.s
+      - name: Test linux x86 SSE2 determinism
+        run: |
+          ./build_linux_sse2/determinism_test verify tests/data tests/data/expected_hashes.txt determinism_linux_x64_sse2.txt
+          ./build_linux_sse2/determinism_test bench tests/data
+      - name: Test linux x86 AVX determinism
+        run: |
+          ./build_linux_avx/determinism_test verify tests/data tests/data/expected_hashes.txt determinism_linux_x64_avx.txt
+          ./build_linux_avx/determinism_test bench tests/data
+      - name: Upload determinism results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: determinism-linux-x64
+          path: determinism_*.txt
+
+  linux-arm:
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: 'recursive'
+      - name: Build linux ARM64
+        run: |
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_C_COMPILER="clang-$CLANG_VERSION" -DCMAKE_CXX_COMPILER="clang++-$CLANG_VERSION" -DACLUNITY_MAKE_TESTS:BOOL="True" -B "build_linux_arm64"
+          cmake --build build_linux_arm64
+      - name: Check linux library dependencies
+        run: bash tests/check_linux_dependencies.sh build_linux_arm64/libAclUnity.so
+      - name: Upload linux ARM64 artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: linux-arm64-artifacts
+          path: |
+            ./build*/libAclUnity*.so*
+            ./build*/**/AclUnity.dir/**/*.s
+      - name: Test linux ARM64 determinism
+        run: |
+          ./build_linux_arm64/determinism_test verify tests/data tests/data/expected_hashes.txt determinism_linux_arm64.txt
+          ./build_linux_arm64/determinism_test bench tests/data
+      - name: Upload determinism results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: determinism-linux-arm64
+          path: determinism_*.txt
+
   windows:
     runs-on: windows-2025-vs2026
     steps:
       - name: Git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           submodules: 'recursive'
       - name: Build windows x86 SSE2
         run: |
-          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -B "build_windows_sse2"
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DACLUNITY_MAKE_TESTS:BOOL="True" -B "build_windows_sse2"
           cmake --build build_windows_sse2 --config RelWithDebInfo
       - name: Build windows x86 AVX
         run: |
-          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DACLUNITY_IS_AVX:BOOL="True" -B build_windows_avx
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DACLUNITY_IS_AVX:BOOL="True" -DACLUNITY_MAKE_TESTS:BOOL="True" -B build_windows_avx
           cmake --build build_windows_avx --config RelWithDebInfo
-      - name: Build windows ARM64
-        run: |
-          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -B build_windows_arm64 -A ARM64
-          cmake --build build_windows_arm64 --config RelWithDebInfo
       - name: Upload windows artifacts
         uses: actions/upload-artifact@v7
         with:
           name: windows-artifacts
           path: |
-            ./build*/**/*.dll
-            ./build*/**/*.pdb
-            ./build*/**/*.asm
-            
+            ./build*/**/AclUnity*.dll
+            ./build*/**/AclUnity*.pdb
+            ./build*/**/AclUnity.dir/**/*.asm
+      - name: Test windows x86 SSE2 determinism
+        run: |
+          ./build_windows_sse2/RelWithDebInfo/determinism_test.exe verify tests/data tests/data/expected_hashes.txt determinism_windows_x64_sse2.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./build_windows_sse2/RelWithDebInfo/determinism_test.exe bench tests/data
+      - name: Test windows x86 AVX determinism
+        run: |
+          ./build_windows_avx/RelWithDebInfo/determinism_test.exe verify tests/data tests/data/expected_hashes.txt determinism_windows_x64_avx.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./build_windows_avx/RelWithDebInfo/determinism_test.exe bench tests/data
+      - name: Upload determinism results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: determinism-windows-x64
+          path: determinism_*.txt
+
+  windows-arm:
+    runs-on: windows-11-arm
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: 'recursive'
+      - name: Build windows ARM64
+        run: |
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DACLUNITY_MAKE_TESTS:BOOL="True" -B build_windows_arm64 -A ARM64
+          cmake --build build_windows_arm64 --config RelWithDebInfo
+      - name: Upload windows ARM64 artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-arm64-artifacts
+          path: |
+            ./build*/**/AclUnity*.dll
+            ./build*/**/AclUnity*.pdb
+            ./build*/**/AclUnity.dir/**/*.asm
+      - name: Test windows ARM64 determinism
+        run: |
+          ./build_windows_arm64/RelWithDebInfo/determinism_test.exe verify tests/data tests/data/expected_hashes.txt determinism_windows_arm64.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./build_windows_arm64/RelWithDebInfo/determinism_test.exe bench tests/data
+      - name: Upload determinism results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: determinism-windows-arm64
+          path: determinism_*.txt
+
   osx:
     runs-on: macos-26
     steps:
       - name: Git checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           submodules: 'recursive'
       - name: Build osx arm
         run: |
-          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_OSX_ARCHITECTURES:STRING="arm64" -B build_osx_arm
+          cmake -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_OSX_ARCHITECTURES:STRING="arm64" -DACLUNITY_MAKE_TESTS:BOOL="True" -B build_osx_arm
           cmake --build build_osx_arm
       - name: Build osx x86 SSE2
         run: |
@@ -98,12 +189,22 @@ jobs:
         with:
           name: osx-artifacts
           path: |
-            ./build_osx*/**/*.dylib
-            ./build_osx*/**/*.s
+            ./build_osx*/**/*AclUnity*.dylib
+            ./build_osx*/**/AclUnity.dir/**/*.s
       - name: Upload ios artifacts
         uses: actions/upload-artifact@v7
         with:
           name: ios-artifacts
           path: |
             ./build_ios*/**/*.a
-            ./build_ios*/**/*.s
+            ./build_ios*/**/AclUnity.dir/**/*.s
+      - name: Test osx arm determinism
+        run: |
+          ./build_osx_arm/determinism_test verify tests/data tests/data/expected_hashes.txt determinism_osx_arm64.txt
+          ./build_osx_arm/determinism_test bench tests/data
+      - name: Upload determinism results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: determinism-osx-arm64
+          path: determinism_*.txt
